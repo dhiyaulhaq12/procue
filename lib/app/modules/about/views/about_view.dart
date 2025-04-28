@@ -5,97 +5,129 @@ class AboutView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          SafeArea(
+            child: Column(
+              children: [
+                // 🔻 Bagian atas: Background hitam + Gambar + Tulisan
+                Container(
+                  width: double.infinity,
+                  height: 250,
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    image: DecorationImage(
+                      image: AssetImage('assets/images/bg_about.png'),
+                      fit: BoxFit.cover,
+                      colorFilter: ColorFilter.mode(
+                        Colors.black.withOpacity(0.5),
+                        BlendMode.darken,
+                      ),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 24),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: const [
+                          Text(
+                            "About",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 28,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          SizedBox(height: 8),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
 
-      // 🔻 Bottom Nav disesuaikan
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.all(16),
-        padding: const EdgeInsets.symmetric(horizontal: 24),
-        height: 60,
-        decoration: BoxDecoration(
-          color: Colors.black,
-          borderRadius: BorderRadius.circular(27),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.home, color: Colors.white),
-              onPressed: () {
-                Get.offAllNamed('/dashboard');
-              },
+                // 🔻 Bagian bawah: Background putih + Teks biasa
+                Expanded(
+                  child: Container(
+                    width: double.infinity,
+                    decoration: const BoxDecoration(
+                      color: Color(0xFFF5F5F5),
+                      borderRadius: BorderRadius.only(
+                        topLeft: Radius.circular(30),
+                        topRight: Radius.circular(30),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 100),
+                      child: SingleChildScrollView(
+                        child: const Text(
+                          "Procue adalah aplikasi pelatihan untuk membantu pemain biliar meningkatkan teknik dan strategi permainan melalui analisis gerakan yang cerdas dan interaktif.\n\n"
+                          "Fitur utama dalam aplikasi ini meliputi:\n"
+                          "1. Deteksi\n"
+                          "2. Kamus Billiard cerdas\n"
+                          "3. Tutorial dan panduan\n"
+                          "4. Riwayat hasil Deteksi\n\n"
+                          "Ada saran atau kendala?\nHubungi kami di:\nprocue.app@gmail.com",
+                          style: TextStyle(
+                            color: Colors.black,
+                            fontSize: 16,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-            IconButton(
-              icon: const Icon(Icons.info_outline, color: Colors.white),
-              onPressed: () {
-                Get.toNamed('/about'); // 🟢 Halaman ini sendiri
-              },
-            ),
-            IconButton(
-              icon: const Icon(Icons.person_outline, color: Colors.white),
-              onPressed: () {
-                Get.toNamed('/profile');
-              },
-            ),
-          ],
-        ),
-      ),
-
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text("About",
-                  style: TextStyle(
-                      fontSize: 24, fontWeight: FontWeight.bold)),
-
-              const SizedBox(height: 16),
-
-              _buildCard(
-                "Procue adalah aplikasi pelatihan untuk membantu pemain biliar meningkatkan teknik dan strategi permainan melalui analisis gerakan yang cerdas dan interaktif.",
-              ),
-
-              const SizedBox(height: 16),
-
-              _buildCard(
-                "List poin-poin fitur kunci dari aplikasi:\n"
-                "1. Deteksi\n"
-                "2. Kamus Billiard cerdas\n"
-                "3. Tutorial dan panduan\n"
-                "4. Riwayat hasil Deteksi",
-              ),
-
-              const SizedBox(height: 16),
-
-              _buildCard(
-                "Ada saran atau kendala?\nHubungi kami di:\nprocue.app@gmail.com",
-              ),
-            ],
           ),
-        ),
+
+          // 🔻 Floating Bottom Navigation Bar
+          Positioned(
+            left: 20,
+            right: 20,
+            bottom: 20,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(27),
+              child: Container(
+                height: 70,
+                color: Colors.black,
+                padding: const EdgeInsets.symmetric(horizontal: 30),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildNavIcon(Icons.home, '/dashboard', Colors.white),
+                    _buildNavIcon(Icons.info_outline, '/about', Colors.white),
+                    _buildNavIcon(
+                        Icons.person_outline, '/profile', Colors.white),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }
 
-  Widget _buildCard(String text) {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: Colors.black,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.shade300,
-            blurRadius: 6,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(color: Colors.white),
+  // ✅ Ini sudah benar sekarang
+  Widget _buildNavIcon(IconData icon, String route, Color iconColor) {
+    return GestureDetector(
+      onTap: () {
+        if (route == '/dashboard') {
+          Get.offAllNamed(route);
+        } else {
+          Get.toNamed(route);
+        }
+      },
+      child: Icon(
+        icon,
+        color: iconColor,
+        size: 28,
       ),
     );
   }
