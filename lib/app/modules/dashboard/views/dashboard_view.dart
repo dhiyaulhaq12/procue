@@ -1,4 +1,3 @@
-import 'package:aplikasi_pelatihan_billiard_cerdas/app/modules/profile/views/profile_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -71,12 +70,20 @@ class DashboardView extends GetView {
                               crossAxisCount: 2,
                               crossAxisSpacing: 20,
                               mainAxisSpacing: 20,
-                              childAspectRatio: 0.8, // Ukuran grid diperbaiki sedikit
+                              childAspectRatio: 0.8,
                               children: [
-                                _buildMenuItem("assets/images/deteksi.jpeg", "Deteksi"),
-                                _buildMenuItem("assets/images/kamus.jpg", "Kamus Billiard"),
-                                _buildMenuItem("assets/images/tutorial.jpg", "Tutorial"),
-                                _buildMenuItem("assets/images/riwayat.jpeg", "Riwayat"),
+                                _buildMenuItem("assets/images/deteksi.jpeg", "Deteksi", () {
+                                  // Get.toNamed('/deteksi'); // tambahkan jika sudah ada
+                                }),
+                                _buildMenuItem("assets/images/kamus.jpg", "Kamus Billiard", () {
+                                  Get.toNamed('/kamus-biliard');
+                                }),
+                                _buildMenuItem("assets/images/tutorial.jpg", "Tutorial", () {
+                                  // Get.toNamed('/tutorial'); // tambahkan jika sudah ada
+                                }),
+                                _buildMenuItem("assets/images/riwayat.jpeg", "Riwayat", () {
+                                  // Get.toNamed('/riwayat'); // tambahkan jika sudah ada
+                                }),
                               ],
                             ),
                           ),
@@ -116,7 +123,6 @@ class DashboardView extends GetView {
     );
   }
 
-  // Widget untuk Icon Navigasi
   Widget _buildNavIcon(IconData icon, String route, Color iconColor) {
     return GestureDetector(
       onTap: () {
@@ -134,31 +140,33 @@ class DashboardView extends GetView {
     );
   }
 
-  // Widget untuk Menu Atas
-  Widget _buildMenuItem(String imagePath, String label) {
+  Widget _buildMenuItem(String imagePath, String label, VoidCallback onTap) {
     double extraSpacing = (label == "Deteksi" || label == "Kamus Billiard") ? 24 : 14;
-    
-    return Column(
-      children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(20),
-          child: Image.asset(
-            imagePath,
-            width: 110, // Lebih besar lagi dari sebelumnya
-            height: 110,
-            fit: BoxFit.cover,
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(20),
+            child: Image.asset(
+              imagePath,
+              width: 110,
+              height: 110,
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        SizedBox(height: extraSpacing), // Extra spacing lebih besar
-        Text(
-          label,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-            fontSize: 14, // Tambahan: sedikit lebih besar font-nya
+          SizedBox(height: extraSpacing),
+          Text(
+            label,
+            style: const TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
           ),
-          textAlign: TextAlign.center,
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

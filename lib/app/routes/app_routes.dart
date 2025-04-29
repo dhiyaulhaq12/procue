@@ -9,6 +9,11 @@ abstract class Routes {
   static const PROFILE = _Paths.PROFILE;
   static const ABOUT = _Paths.ABOUT;
   static const ON_BOARDING = _Paths.ON_BOARDING;
+  static const KAMUS_BILIARD = _Paths.KAMUS_BILIARD;
+  static const TEKNIK_PUKULAN = _Paths.TEKNIK_PUKULAN;
+  static const PERALATAN = _Paths.PERALATAN;
+  static const ATURAN_PERMAINAN = _Paths.ATURAN_PERMAINAN;
+  static const JENIS_PERMAINAN = _Paths.JENIS_PERMAINAN;
 }
 
 abstract class _Paths {
@@ -20,4 +25,9 @@ abstract class _Paths {
   static const PROFILE = '/profile';
   static const ABOUT = '/about';
   static const ON_BOARDING = '/on-boarding';
+  static const KAMUS_BILIARD = '/kamus-biliard';
+  static const TEKNIK_PUKULAN = '/teknik-pukulan';
+  static const PERALATAN = '/peralatan';
+  static const ATURAN_PERMAINAN = '/aturan-permainan';
+  static const JENIS_PERMAINAN = '/jenis-permainan';
 }
