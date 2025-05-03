@@ -6,6 +6,8 @@ import '../modules/aturan_permainan/bindings/aturan_permainan_binding.dart';
 import '../modules/aturan_permainan/views/aturan_permainan_view.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
 import '../modules/dashboard/views/dashboard_view.dart';
+import '../modules/deteksi/bindings/deteksi_binding.dart';
+import '../modules/deteksi/views/deteksi_view.dart';
 import '../modules/forgot_password/bindings/forgot_password_binding.dart';
 import '../modules/forgot_password/views/forgot_password_view.dart';
 import '../modules/jenis_permainan/bindings/jenis_permainan_binding.dart';
@@ -22,6 +24,8 @@ import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/register/bindings/register_binding.dart';
 import '../modules/register/views/register_view.dart';
+import '../modules/riwayat/bindings/riwayat_binding.dart';
+import '../modules/riwayat/views/riwayat_view.dart';
 import '../modules/teknik_pukulan/bindings/teknik_pukulan_binding.dart';
 import '../modules/teknik_pukulan/views/teknik_pukulan_view.dart';
 
@@ -92,6 +96,16 @@ class AppPages {
       name: '/jenis_permainan',
       page: () => const JenisPermainanView(),
       binding: JenisPermainanBinding(),
+    ),
+    GetPage(
+      name: '/deteksi',
+      page: () => const DeteksiView(),
+      binding: DeteksiBinding(),
+    ),
+    GetPage(
+      name: '/riwayat',
+      page: () => const RiwayatView(),
+      binding: RiwayatBinding(),
     ),
   ];
 }

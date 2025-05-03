@@ -8,95 +8,86 @@ class DashboardView extends GetView {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
+          // Atas: Welcome Text dan Banner
           SafeArea(
             child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Welcome Text
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-                  child: Align(
-                    alignment: Alignment.centerLeft,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: const [
-                        Text(
-                          "Welcome,",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          "ProCue Apps",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 26,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 24, horizontal: 20),
+                  child: Text(
+                    'Welcome,\nProCue Apps',
+                    style: TextStyle(
+                      fontSize: 26,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ),
-
-                // Container Putih
-                Expanded(
-                  child: Container(
-                    width: double.infinity,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFFF5F5F5),
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(30),
-                        topRight: Radius.circular(30),
-                      ),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(20),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Text(
-                            "MY FITURE",
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
-                          Expanded(
-                            child: GridView.count(
-                              crossAxisCount: 2,
-                              crossAxisSpacing: 20,
-                              mainAxisSpacing: 20,
-                              childAspectRatio: 0.8,
-                              children: [
-                                _buildMenuItem("assets/images/deteksi.jpeg", "Deteksi", () {
-                                  // Get.toNamed('/deteksi'); // tambahkan jika sudah ada
-                                }),
-                                _buildMenuItem("assets/images/kamus.jpg", "Kamus Billiard", () {
-                                  Get.toNamed('/kamus-biliard');
-                                }),
-                                _buildMenuItem("assets/images/tutorial.jpg", "Tutorial", () {
-                                  // Get.toNamed('/tutorial'); // tambahkan jika sudah ada
-                                }),
-                                _buildMenuItem("assets/images/riwayat.jpeg", "Riwayat", () {
-                                  // Get.toNamed('/riwayat'); // tambahkan jika sudah ada
-                                }),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
+                Image.asset(
+                  'assets/images/banner.jpg', // Ganti sesuai kebutuhan
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
                 ),
               ],
             ),
           ),
 
-          // Floating Bottom Navigation Bar
+          // Kontainer Putih seperti di RiwayatView
+          Positioned(
+            top: 220,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(30),
+                  topRight: Radius.circular(30),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "MY FITURE",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Expanded(
+                    child: GridView.count(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16,
+                      mainAxisSpacing: 16,
+                      childAspectRatio: 0.85,
+                      children: [
+                        _buildMenuItem("assets/images/deteksi.jpeg", "Deteksi", () {
+                          Get.toNamed('/deteksi');
+                        }),
+                        _buildMenuItem("assets/images/kamus.jpg", "Kamus Billiard", () {
+                          Get.toNamed('/kamus-biliard');
+                        }),
+                        _buildMenuItem("assets/images/tutorial.jpg", "Tutorial", () {
+                          // Get.toNamed('/tutorial');
+                        }),
+                        _buildMenuItem("assets/images/riwayat.jpeg", "Riwayat", () {
+                          Get.toNamed('/riwayat');
+                        }),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          // Bottom Navigation
           Positioned(
             left: 20,
             right: 20,
@@ -123,7 +114,45 @@ class DashboardView extends GetView {
     );
   }
 
-  Widget _buildNavIcon(IconData icon, String route, Color iconColor) {
+  Widget _buildMenuItem(String imagePath, String label, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  imagePath,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 14,
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildNavIcon(IconData icon, String route, Color color) {
     return GestureDetector(
       onTap: () {
         if (route == '/dashboard') {
@@ -132,41 +161,7 @@ class DashboardView extends GetView {
           Get.toNamed(route);
         }
       },
-      child: Icon(
-        icon,
-        color: iconColor,
-        size: 28,
-      ),
-    );
-  }
-
-  Widget _buildMenuItem(String imagePath, String label, VoidCallback onTap) {
-    double extraSpacing = (label == "Deteksi" || label == "Kamus Billiard") ? 24 : 14;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        children: [
-          ClipRRect(
-            borderRadius: BorderRadius.circular(20),
-            child: Image.asset(
-              imagePath,
-              width: 110,
-              height: 110,
-              fit: BoxFit.cover,
-            ),
-          ),
-          SizedBox(height: extraSpacing),
-          Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
+      child: Icon(icon, color: color, size: 28),
     );
   }
 }

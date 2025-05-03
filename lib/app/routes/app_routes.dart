@@ -14,6 +14,8 @@ abstract class Routes {
   static const PERALATAN = _Paths.PERALATAN;
   static const ATURAN_PERMAINAN = _Paths.ATURAN_PERMAINAN;
   static const JENIS_PERMAINAN = _Paths.JENIS_PERMAINAN;
+  static const DETEKSI = _Paths.DETEKSI;
+  static const RIWAYAT = _Paths.RIWAYAT;
 }
 
 abstract class _Paths {
@@ -30,4 +32,6 @@ abstract class _Paths {
   static const PERALATAN = '/peralatan';
   static const ATURAN_PERMAINAN = '/aturan-permainan';
   static const JENIS_PERMAINAN = '/jenis-permainan';
+  static const DETEKSI = '/deteksi';
+  static const RIWAYAT = '/riwayat';
 }
