@@ -9,6 +9,7 @@ android {
     namespace = "com.example.aplikasi_pelatihan_billiard_cerdas"
     compileSdk = flutter.compileSdkVersion
     ndkVersion = '25.1.8937393'
+    
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8

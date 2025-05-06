@@ -18,7 +18,8 @@ class AboutView extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.black,
                     image: DecorationImage(
-                      image: AssetImage('assets/images/bg_about.png'), // Ganti dengan gambar sesuai
+                      image: AssetImage(
+                          'assets/images/bg_about.png'), // Ganti dengan gambar sesuai
                       fit: BoxFit.cover,
                       colorFilter: ColorFilter.mode(
                         Colors.black.withOpacity(0.5),
@@ -27,7 +28,8 @@ class AboutView extends StatelessWidget {
                     ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 20, vertical: 24),
                     child: Align(
                       alignment: Alignment.centerLeft,
                       child: Column(
@@ -53,7 +55,7 @@ class AboutView extends StatelessWidget {
 
           // Kontainer Putih
           Positioned(
-            top: 220,  // Disesuaikan dengan posisi kontainer putih
+            top: 220, // Disesuaikan dengan posisi kontainer putih
             left: 0,
             right: 0,
             bottom: 0,
@@ -101,7 +103,8 @@ class AboutView extends StatelessWidget {
                   children: [
                     _buildNavIcon(Icons.home, '/dashboard', Colors.white),
                     _buildNavIcon(Icons.info_outline, '/about', Colors.white),
-                    _buildNavIcon(Icons.person_outline, '/profile', Colors.white),
+                    _buildNavIcon(
+                        Icons.person_outline, '/profile', Colors.white),
                   ],
                 ),
               ),

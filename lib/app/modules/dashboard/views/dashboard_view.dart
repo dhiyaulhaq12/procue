@@ -67,16 +67,20 @@ class DashboardView extends GetView {
                       mainAxisSpacing: 16,
                       childAspectRatio: 0.85,
                       children: [
-                        _buildMenuItem("assets/images/deteksi.jpeg", "Deteksi", () {
+                        _buildMenuItem("assets/images/deteksi.jpeg", "Deteksi",
+                            () {
                           Get.toNamed('/deteksi');
                         }),
-                        _buildMenuItem("assets/images/kamus.jpg", "Kamus Billiard", () {
+                        _buildMenuItem(
+                            "assets/images/kamus.jpg", "Kamus Billiard", () {
                           Get.toNamed('/kamus-biliard');
                         }),
-                        _buildMenuItem("assets/images/tutorial.jpg", "Tutorial", () {
-                          // Get.toNamed('/tutorial');
+                        _buildMenuItem("assets/images/tutorial.jpg", "Tutorial",
+                            () {
+                          Get.toNamed('/tutorial');
                         }),
-                        _buildMenuItem("assets/images/riwayat.jpeg", "Riwayat", () {
+                        _buildMenuItem("assets/images/riwayat.jpeg", "Riwayat",
+                            () {
                           Get.toNamed('/riwayat');
                         }),
                       ],
@@ -103,7 +107,8 @@ class DashboardView extends GetView {
                   children: [
                     _buildNavIcon(Icons.home, '/dashboard', Colors.white),
                     _buildNavIcon(Icons.info_outline, '/about', Colors.white),
-                    _buildNavIcon(Icons.person_outline, '/profile', Colors.white),
+                    _buildNavIcon(
+                        Icons.person_outline, '/profile', Colors.white),
                   ],
                 ),
               ),

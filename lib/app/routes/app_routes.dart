@@ -16,6 +16,7 @@ abstract class Routes {
   static const JENIS_PERMAINAN = _Paths.JENIS_PERMAINAN;
   static const DETEKSI = _Paths.DETEKSI;
   static const RIWAYAT = _Paths.RIWAYAT;
+  static const TUTORIAL = _Paths.TUTORIAL;
 }
 
 abstract class _Paths {
@@ -34,4 +35,5 @@ abstract class _Paths {
   static const JENIS_PERMAINAN = '/jenis-permainan';
   static const DETEKSI = '/deteksi';
   static const RIWAYAT = '/riwayat';
+  static const TUTORIAL = '/tutorial';
 }
