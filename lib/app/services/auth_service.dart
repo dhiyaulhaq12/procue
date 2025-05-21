@@ -1,17 +1,34 @@
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+
 class AuthService {
-  static String? _registeredEmail;
-  static String? _registeredPassword;
+  static const baseUrl = 'http://127.0.0.1:5000'; // Ganti dengan IP PC kamu
 
-  static void register(String email, String password) {
-    _registeredEmail = email;
-    _registeredPassword = password;
+  static Future<Map<String, dynamic>> register(
+      String username, String email, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/register'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'username': username,
+        'email': email,
+        'password': password,
+      }),
+    );
+
+    return jsonDecode(response.body);
   }
 
-  static bool login(String email, String password) {
-    return email == _registeredEmail && password == _registeredPassword;
-  }
+  static Future<Map<String, dynamic>> login(String email, String password) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'password': password,
+      }),
+    );
 
-  static bool isRegistered() {
-    return _registeredEmail != null && _registeredPassword != null;
+    return jsonDecode(response.body);
   }
 }

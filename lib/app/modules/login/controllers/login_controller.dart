@@ -6,21 +6,24 @@ class LoginController extends GetxController {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
-  void login() {
-    final email = emailController.text.trim();
-    final password = passwordController.text;
+  void login() async {
+  final email = emailController.text.trim();
+  final password = passwordController.text;
 
-    if (email.isEmpty || password.isEmpty) {
-      Get.snackbar('Login Gagal', 'Email dan password wajib diisi');
-      return;
-    }
-
-    if (AuthService.login(email, password)) {
-      Get.offAllNamed('/dashboard');
-    } else {
-      Get.snackbar('Login Gagal', 'Email atau password salah');
-    }
+  if (email.isEmpty || password.isEmpty) {
+    Get.snackbar('Gagal', 'Email dan password wajib diisi');
+    return;
   }
+
+  final response = await AuthService.login(email, password);
+  if (response.containsKey('token')) {
+    // Simpan token ke SharedPreferences kalau mau
+    Get.snackbar('Sukses', 'Login berhasil');
+    Get.offNamed('/dashboard');
+  } else {
+    Get.snackbar('Login Gagal', response['error'] ?? 'Terjadi kesalahan');
+  }
+}
 
   @override
   void onClose() {

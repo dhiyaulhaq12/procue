@@ -14,7 +14,7 @@ class RegisterView extends GetView<RegisterController> {
           Container(
             decoration: BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/BG.jpeg'), // Ganti ke foto kamu
+                image: AssetImage('assets/images/BG.jpeg'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -40,6 +40,27 @@ class RegisterView extends GetView<RegisterController> {
                       ),
                     ),
                     const SizedBox(height: 30),
+
+                    // Username Field
+                    TextField(
+                      controller: controller.usernameController,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        labelText: 'Username',
+                        labelStyle: const TextStyle(color: Colors.white),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.white),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // Email Field
                     TextField(
                       controller: controller.emailController,
                       style: const TextStyle(color: Colors.white),
@@ -57,6 +78,8 @@ class RegisterView extends GetView<RegisterController> {
                       ),
                     ),
                     const SizedBox(height: 16),
+
+                    // Password Field
                     TextField(
                       controller: controller.passwordController,
                       obscureText: true,
@@ -75,6 +98,8 @@ class RegisterView extends GetView<RegisterController> {
                       ),
                     ),
                     const SizedBox(height: 16),
+
+                    // Confirm Password
                     TextField(
                       controller: controller.confirmPasswordController,
                       obscureText: true,
@@ -93,6 +118,7 @@ class RegisterView extends GetView<RegisterController> {
                       ),
                     ),
                     const SizedBox(height: 16),
+
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
@@ -110,10 +136,11 @@ class RegisterView extends GetView<RegisterController> {
                       ],
                     ),
                     const SizedBox(height: 24),
+
                     ElevatedButton(
                       onPressed: controller.register,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.black, // background hitam
+                        backgroundColor: Colors.black,
                         minimumSize: const Size(double.infinity, 48),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
@@ -121,7 +148,7 @@ class RegisterView extends GetView<RegisterController> {
                       ),
                       child: const Text(
                         'Daftar',
-                        style: TextStyle(color: Colors.white), // teks putih
+                        style: TextStyle(color: Colors.white),
                       ),
                     )
                   ],

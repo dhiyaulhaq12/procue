@@ -86,13 +86,6 @@ class ProfileView extends GetView<ProfileController> {
                     ),
                     Divider(),
                     ListTile(
-                      leading:
-                          Icon(Icons.verified_user, color: Colors.deepPurple),
-                      title: Text("Otentikasi Dua Faktor"),
-                      trailing: Icon(Icons.arrow_forward_ios, size: 16),
-                    ),
-                    Divider(),
-                    ListTile(
                       leading: Icon(Icons.logout, color: Colors.deepPurple),
                       title: Text("Keluar"),
                       trailing: Icon(Icons.arrow_forward_ios, size: 16),
