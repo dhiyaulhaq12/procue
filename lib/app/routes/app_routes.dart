@@ -17,6 +17,7 @@ abstract class Routes {
   static const DETEKSI = _Paths.DETEKSI;
   static const RIWAYAT = _Paths.RIWAYAT;
   static const TUTORIAL = _Paths.TUTORIAL;
+  static const OTP = _Paths.OTP;
 }
 
 abstract class _Paths {
@@ -36,4 +37,5 @@ abstract class _Paths {
   static const DETEKSI = '/deteksi';
   static const RIWAYAT = '/riwayat';
   static const TUTORIAL = '/tutorial';
+  static const OTP = '/otp';
 }

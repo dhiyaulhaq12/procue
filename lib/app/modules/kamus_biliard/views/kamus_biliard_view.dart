@@ -7,7 +7,7 @@ class KamusBiliardView extends GetView<KamusBiliardController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return Scaffold(  
       backgroundColor: Colors.black,
       body: Stack(
         children: [

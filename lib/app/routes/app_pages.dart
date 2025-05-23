@@ -18,6 +18,8 @@ import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/on_boarding/bindings/on_boarding_binding.dart';
 import '../modules/on_boarding/views/on_boarding_view.dart';
+import '../modules/otp/bindings/otp_binding.dart';
+import '../modules/otp/views/otp_view.dart';
 import '../modules/peralatan/bindings/peralatan_binding.dart';
 import '../modules/peralatan/views/peralatan_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
@@ -113,6 +115,10 @@ class AppPages {
       name: _Paths.TUTORIAL,
       page: () => const TutorialView(),
       binding: TutorialBinding(),
+    ),
+    GetPage(
+      name: '/otp-verification',
+      page: () => OtpView(),
     ),
   ];
 }
