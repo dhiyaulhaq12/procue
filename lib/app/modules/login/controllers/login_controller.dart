@@ -16,12 +16,13 @@ class LoginController extends GetxController {
     }
 
     final response = await AuthService.login(email, password);
-    if (response.containsKey('access_token')) {
-      // Simpan token ke SharedPreferences kalau mau
-      Get.snackbar('Sukses', 'Login berhasil');
+
+    if (response['success'] == true && response.containsKey('access_token')) {
+      // Simpan token ke SharedPreferences jika perlu
+      Get.snackbar('Sukses', response['message']);
       Get.offNamed('/dashboard');
     } else {
-      Get.snackbar('Login Gagal', response['error'] ?? 'Terjadi kesalahan');
+      Get.snackbar('Login Gagal', response['message'] ?? 'Terjadi kesalahan');
     }
   }
 

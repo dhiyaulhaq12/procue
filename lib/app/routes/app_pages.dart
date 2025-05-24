@@ -117,8 +117,9 @@ class AppPages {
       binding: TutorialBinding(),
     ),
     GetPage(
-      name: '/otp-verification',
+      name: '/otp',
       page: () => OtpView(),
+      binding: OtpBinding(),
     ),
   ];
 }

@@ -39,6 +39,7 @@ dependencies:
   url_launcher: ^6.1.10
   flutter_inappwebview: ^6.0.0
   http: ^0.13.6
+  lottie: ^2.7.0
 
 
 
@@ -70,6 +71,10 @@ flutter:
     - assets/images/openbridge.jpg
     - assets/images/closebridge.jpg
     - assets/images/railbridge.jpg
+    - assets/images/otp.png
+    - assets/lottie/otp.json
+    - assets/lottie/otp1.json
+
     
 
 

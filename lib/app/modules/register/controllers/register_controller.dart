@@ -8,41 +8,53 @@ class RegisterController extends GetxController {
   final passwordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
-  void register() async {
+  Future<Map<String, dynamic>> register() async {
     final username = usernameController.text.trim();
     final email = emailController.text.trim();
     final password = passwordController.text;
     final confirm = confirmPasswordController.text;
 
-    // Validasi field tidak boleh kosong
-    if (username.isEmpty || email.isEmpty || password.isEmpty || confirm.isEmpty) {
-      Get.snackbar('Pendaftaran Gagal', 'Semua field wajib diisi');
-      return;
+    // Validasi semua field
+    if (username.isEmpty ||
+        email.isEmpty ||
+        password.isEmpty ||
+        confirm.isEmpty) {
+      return {
+        'success': false,
+        'message': 'Semua field wajib diisi',
+      };
     }
 
-    // Validasi format email yang benar
+    // Validasi email
     final emailRegex = RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$');
     if (!emailRegex.hasMatch(email)) {
-      Get.snackbar('Pendaftaran Gagal', 'Email tidak valid');
-      return;
+      return {
+        'success': false,
+        'message': 'Format email tidak valid',
+      };
     }
 
-    // Validasi password sama
+    // Validasi konfirmasi password
     if (password != confirm) {
-      Get.snackbar('Pendaftaran Gagal', 'Password tidak sama');
-      return;
+      return {
+        'success': false,
+        'message': 'Password dan konfirmasi tidak sama',
+      };
     }
 
-    // Kirim ke backend
+    // Kirim data ke AuthService
     final response = await AuthService.register(username, email, password);
 
-    if (response.containsKey('message') && response['message'] == 'User registered successfully') {
-      Get.snackbar('Sukses', response['message']);
-      Get.offNamed('/login');
+    if (response['success'] == true) {
+      return {
+        'success': true,
+        'message': response['message'] ?? 'Registrasi berhasil',
+      };
     } else {
-      // Tangani semua kemungkinan pesan error
-      final errorMsg = response['message'] ?? response['error'] ?? 'Terjadi kesalahan tidak diketahui';
-      Get.snackbar('Gagal', errorMsg);
+      return {
+        'success': false,
+        'message': response['message'] ?? 'Terjadi kesalahan saat registrasi',
+      };
     }
   }
 

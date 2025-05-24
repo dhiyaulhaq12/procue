@@ -12,7 +12,7 @@ class RegisterView extends GetView<RegisterController> {
         children: [
           // Background Image
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
                 image: AssetImage('assets/images/BG.jpeg'),
                 fit: BoxFit.cover,
@@ -49,11 +49,11 @@ class RegisterView extends GetView<RegisterController> {
                         labelText: 'Username',
                         labelStyle: const TextStyle(color: Colors.white),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide: const BorderSide(color: Colors.white),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                          borderSide: const BorderSide(color: Colors.lightBlueAccent),
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
@@ -68,11 +68,11 @@ class RegisterView extends GetView<RegisterController> {
                         labelText: 'Email',
                         labelStyle: const TextStyle(color: Colors.white),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide: const BorderSide(color: Colors.white),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                          borderSide: const BorderSide(color: Colors.lightBlueAccent),
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
@@ -88,11 +88,11 @@ class RegisterView extends GetView<RegisterController> {
                         labelText: 'Password',
                         labelStyle: const TextStyle(color: Colors.white),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide: const BorderSide(color: Colors.white),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                          borderSide: const BorderSide(color: Colors.lightBlueAccent),
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
@@ -108,11 +108,11 @@ class RegisterView extends GetView<RegisterController> {
                         labelText: 'Konfirmasi Password',
                         labelStyle: const TextStyle(color: Colors.white),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide: const BorderSide(color: Colors.white),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                          borderSide: const BorderSide(color: Colors.lightBlueAccent),
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
@@ -138,7 +138,24 @@ class RegisterView extends GetView<RegisterController> {
                     const SizedBox(height: 24),
 
                     ElevatedButton(
-                      onPressed: controller.register,
+                      onPressed: () async {
+                        final result = await controller.register();
+
+                        if (result['success'] == true) {
+                          // Arahkan ke halaman OTP
+                          Get.toNamed('/otp', arguments: {
+                            'email': controller.emailController.text.trim(),
+                          });
+                        } else {
+                          // Tampilkan pesan error
+                          Get.snackbar(
+                            'Gagal',
+                            result['message'] ?? 'Registrasi gagal',
+                            backgroundColor: Colors.redAccent,
+                            colorText: Colors.white,
+                          );
+                        }
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.black,
                         minimumSize: const Size(double.infinity, 48),
