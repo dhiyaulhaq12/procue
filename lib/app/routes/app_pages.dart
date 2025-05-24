@@ -8,6 +8,10 @@ import '../modules/dashboard/bindings/dashboard_binding.dart';
 import '../modules/dashboard/views/dashboard_view.dart';
 import '../modules/deteksi/bindings/deteksi_binding.dart';
 import '../modules/deteksi/views/deteksi_view.dart';
+import '../modules/edit_password/bindings/edit_password_binding.dart';
+import '../modules/edit_password/views/edit_password_view.dart';
+import '../modules/edit_profil/bindings/edit_profil_binding.dart';
+import '../modules/edit_profil/views/edit_profil_view.dart';
 import '../modules/forgot_password/bindings/forgot_password_binding.dart';
 import '../modules/forgot_password/views/forgot_password_view.dart';
 import '../modules/jenis_permainan/bindings/jenis_permainan_binding.dart';
@@ -120,6 +124,16 @@ class AppPages {
       name: '/otp',
       page: () => OtpView(),
       binding: OtpBinding(),
+    ),
+    GetPage(
+      name: _Paths.EDIT_PROFIL,
+      page: () => EditProfilView(),
+      binding: EditProfilBinding(),
+    ),
+    GetPage(
+      name: _Paths.EDIT_PASSWORD,
+      page: () =>  EditPasswordView(),
+      binding: EditPasswordBinding(),
     ),
   ];
 }

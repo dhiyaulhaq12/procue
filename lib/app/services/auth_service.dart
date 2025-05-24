@@ -1,10 +1,12 @@
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
   static const baseUrl =
-      'http://192.168.1.6:5000'; // Ganti sesuai IP backend kamu
+      'http://192.168.0.109:5000'; // Ganti dengan IP backend kamu
 
+  // ✅ REGISTER
   static Future<Map<String, dynamic>> register(
       String username, String email, String password) async {
     try {
@@ -40,6 +42,7 @@ class AuthService {
     }
   }
 
+  // ✅ LOGIN
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
     try {
@@ -55,16 +58,18 @@ class AuthService {
       final data = jsonDecode(response.body);
 
       if (response.statusCode == 200) {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('token', data['access_token']);
+
         return {
           'success': true,
           'message': data['message'] ?? 'Login berhasil',
-          'access_token': data['access_token'], // ambil token di sini
+          'access_token': data['access_token'],
         };
       } else {
         return {
           'success': false,
-          'message': data['message'] ??
-              'Gagal login', // di backend kamu pakai key 'message'
+          'message': data['message'] ?? 'Gagal login',
           'details': data,
         };
       }
@@ -76,6 +81,7 @@ class AuthService {
     }
   }
 
+  // ✅ VERIFIKASI OTP
   static Future<Map<String, dynamic>> verifyOtp(
       String email, String otp) async {
     try {
@@ -105,5 +111,50 @@ class AuthService {
         'message': 'Kesalahan jaringan: $e',
       };
     }
+  }
+
+  // ✅ AMBIL DATA USER DENGAN TOKEN
+  static Future<Map<String, dynamic>> getUserData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+
+    if (token == null) {
+      return {'success': false, 'message': 'Token tidak ditemukan'};
+    }
+
+    try {
+      final response = await http.get(
+        Uri.parse('$baseUrl/user'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      final data = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        return {
+          'success': true,
+          'user': data['user'],
+        };
+      } else {
+        return {
+          'success': false,
+          'message': data['message'] ?? 'Gagal mendapatkan data user',
+        };
+      }
+    } catch (e) {
+      return {
+        'success': false,
+        'message': 'Kesalahan jaringan: $e',
+      };
+    }
+  }
+
+  // ✅ LOGOUT
+  static Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('token');
   }
 }

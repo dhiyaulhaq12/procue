@@ -23,8 +23,7 @@ class ProfileView extends GetView<ProfileController> {
             IconButton(
               icon: const Icon(Icons.home, color: Colors.white),
               onPressed: () {
-                Get.offAllNamed(
-                    '/dashboard'); // Navigasi ke Dashboard dan hapus history
+                Get.offAllNamed('/dashboard'); // Navigasi ke Dashboard dan hapus history
               },
             ),
             IconButton(
@@ -43,22 +42,29 @@ class ProfileView extends GetView<ProfileController> {
           ],
         ),
       ),
+
       body: SafeArea(
         child: Column(
           children: [
             const SizedBox(height: 16),
             const Text('Profile',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)), 
             const SizedBox(height: 16),
             CircleAvatar(
               radius: 40,
-              backgroundImage:
-                  AssetImage('assets/avatar.png'), // ganti sesuai kebutuhan
+              backgroundImage: AssetImage('assets/closebridge.png'), // ganti sesuai kebutuhan
             ),
             const SizedBox(height: 12),
-            const Text("Reza Rahardian",
-                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600)),
+
+            // Reactive username
+            Obx(() => Text(
+                  controller.username.value.isEmpty
+                      ? 'Loading...'
+                      : controller.username.value,
+                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                )),
             const SizedBox(height: 20),
+
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: Card(
@@ -68,27 +74,28 @@ class ProfileView extends GetView<ProfileController> {
                 child: Column(
                   children: [
                     ListTile(
-                      leading: Icon(Icons.email, color: Colors.deepPurple),
-                      title: Text("rezarahardian@gmail.com"),
-                      trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                      leading: const Icon(Icons.email, color: Colors.deepPurple),
+                      title: Obx(() => Text(
+                          controller.email.value.isEmpty
+                              ? 'Loading...'
+                              : controller.email.value)),
                     ),
-                    Divider(),
+                    const Divider(),
                     ListTile(
-                      leading: Icon(Icons.person, color: Colors.deepPurple),
-                      title: Text("Reza Rahardian"),
-                      trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                      leading: const Icon(Icons.person, color: Colors.deepPurple),
+                      title: Obx(() => Text(controller.username.value)),
+                      onTap: () => Get.toNamed('/edit-profil'),
                     ),
-                    Divider(),
+                    const Divider(),
                     ListTile(
-                      leading: Icon(Icons.lock, color: Colors.deepPurple),
-                      title: Text("********"),
-                      trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                      leading: const Icon(Icons.lock, color: Colors.deepPurple),
+                      title: const Text("********"),
+                      onTap: () => Get.toNamed('/edit-password'),
                     ),
-                    Divider(),
+                    const Divider(),
                     ListTile(
-                      leading: Icon(Icons.logout, color: Colors.deepPurple),
-                      title: Text("Keluar"),
-                      trailing: Icon(Icons.arrow_forward_ios, size: 16),
+                      leading: const Icon(Icons.logout, color: Colors.deepPurple),
+                      title: const Text("Keluar"),
                       onTap: () {
                         Get.defaultDialog(
                           title: "Keluar",
