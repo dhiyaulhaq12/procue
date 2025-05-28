@@ -3,10 +3,8 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AuthService {
-  static const baseUrl =
-      'http://192.168.0.109:5000'; // Ganti dengan IP backend kamu
+  static const baseUrl = 'https://backend-billiard.vercel.app';
 
-  // ✅ REGISTER
   static Future<Map<String, dynamic>> register(
       String username, String email, String password) async {
     try {
@@ -42,7 +40,6 @@ class AuthService {
     }
   }
 
-  // ✅ LOGIN
   static Future<Map<String, dynamic>> login(
       String email, String password) async {
     try {
@@ -81,7 +78,6 @@ class AuthService {
     }
   }
 
-  // ✅ VERIFIKASI OTP
   static Future<Map<String, dynamic>> verifyOtp(
       String email, String otp) async {
     try {
@@ -113,7 +109,6 @@ class AuthService {
     }
   }
 
-  // ✅ AMBIL DATA USER DENGAN TOKEN
   static Future<Map<String, dynamic>> getUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
@@ -152,7 +147,6 @@ class AuthService {
     }
   }
 
-  // ✅ LOGOUT
   static Future<void> logout() async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove('token');

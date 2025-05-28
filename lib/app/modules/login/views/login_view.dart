@@ -12,9 +12,9 @@ class LoginView extends GetView<LoginController> {
         children: [
           // Background Image
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               image: DecorationImage(
-                image: AssetImage('assets/images/BG.jpeg'), // Ganti ke gambar kamu
+                image: AssetImage('assets/images/BG.jpeg'),
                 fit: BoxFit.cover,
               ),
             ),
@@ -47,11 +47,12 @@ class LoginView extends GetView<LoginController> {
                         labelText: 'Email',
                         labelStyle: const TextStyle(color: Colors.white),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide: const BorderSide(color: Colors.white),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                          borderSide:
+                              const BorderSide(color: Colors.lightBlueAccent),
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
@@ -65,11 +66,12 @@ class LoginView extends GetView<LoginController> {
                         labelText: 'Password',
                         labelStyle: const TextStyle(color: Colors.white),
                         enabledBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.white),
+                          borderSide: const BorderSide(color: Colors.white),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderSide: BorderSide(color: Colors.lightBlueAccent),
+                          borderSide:
+                              const BorderSide(color: Colors.lightBlueAccent),
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
@@ -105,7 +107,39 @@ class LoginView extends GetView<LoginController> {
                         'Masuk',
                         style: TextStyle(color: Colors.white),
                       ),
-                    )
+                    ),
+                    const SizedBox(height: 12),
+
+                    // 🔴 Tombol Login dengan Google
+                    ElevatedButton(
+                      onPressed: controller.signInWithGoogle,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.white,
+                        minimumSize: const Size(double.infinity, 48),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        elevation: 2,
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/google.png',
+                            height: 32,
+                          ),
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Masuk dengan Google',
+                            style: TextStyle(
+                              color: Colors.black87,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ],
                 ),
               ),

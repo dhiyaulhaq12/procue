@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "296594701238",
+    "project_id": "procue-649d0",
+    "storage_bucket": "procue-649d0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:296594701238:android:b3e293845c6bf330a29f17",
+        "android_client_info": {
+          "package_name": "com.example.aplikasi_pelatihan_billiard_cerdas"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "296594701238-vi1mh5sdp7tjo5p0af10dkmsbj3hah1u.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.aplikasi_pelatihan_billiard_cerdas",
+            "certificate_hash": "cb89ff191bb1cf21371d6fe8ca8a9bf80236f950"
+          }
+        },
+        {
+          "client_id": "296594701238-f25vm8c965slk37m0qma18kfm28qjnfa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDpStuMFRNnDgdmeHNLvnYSO4zsfRqt2Tg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "296594701238-f25vm8c965slk37m0qma18kfm28qjnfa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

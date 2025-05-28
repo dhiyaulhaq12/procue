@@ -40,6 +40,9 @@ dependencies:
   flutter_inappwebview: ^6.0.0
   http: ^0.13.6
   lottie: ^2.7.0
+  firebase_core: ^2.27.0
+  firebase_auth: ^4.15.0
+  google_sign_in: ^5.4.4
 
 
 
@@ -75,6 +78,7 @@ flutter:
     - assets/images/otp.png
     - assets/lottie/otp.json
     - assets/lottie/otp1.json
+    - assets/images/google.png
 
     
 
