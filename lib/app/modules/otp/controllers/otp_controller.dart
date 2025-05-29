@@ -50,6 +50,33 @@ class OtpController extends GetxController {
     }
   }
 
+  Future resendOtp() async {
+    if (email.value.isEmpty) {
+      Get.snackbar('Gagal', 'Email tidak tersedia',
+          backgroundColor: Colors.redAccent, colorText: Colors.white);
+      return;
+    }
+
+    try {
+      isLoading.value = true;
+      final response = await AuthService.resendOtp(email.value);
+
+      if (response['success'] == true) {
+        Get.snackbar(
+            'Sukses', response['message'] ?? 'Kode OTP telah dikirim ulang',
+            backgroundColor: Colors.green, colorText: Colors.white);
+      } else {
+        Get.snackbar('Gagal', response['message'] ?? 'Gagal mengirim ulang OTP',
+            backgroundColor: Colors.redAccent, colorText: Colors.white);
+      }
+    } catch (e) {
+      Get.snackbar('Gagal', 'Terjadi kesalahan: $e',
+          backgroundColor: Colors.redAccent, colorText: Colors.white);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   @override
   void onClose() {
     otpController.dispose();

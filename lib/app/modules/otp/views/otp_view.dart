@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import '../controllers/otp_controller.dart';
- // pastikan path ini benar
+// pastikan path ini benar
 
 class OtpView extends StatefulWidget {
   @override
@@ -13,21 +13,22 @@ class OtpView extends StatefulWidget {
 
 class _OtpViewState extends State<OtpView> {
   final int otpLength = 6;
-  final int totalTimeInSeconds = 300;
+  final int totalTimeInSeconds = 60;
   final OtpController otpControllerGetx = Get.put(OtpController());
 
   List<FocusNode> focusNodes = [];
   List<TextEditingController> otpFieldControllers = [];
 
   Timer? _timer;
-  int _secondsRemaining = 300;
+  int _secondsRemaining = 60;
   bool _canResend = false;
 
   @override
   void initState() {
     super.initState();
     focusNodes = List.generate(otpLength, (_) => FocusNode());
-    otpFieldControllers = List.generate(otpLength, (_) => TextEditingController());
+    otpFieldControllers =
+        List.generate(otpLength, (_) => TextEditingController());
     startTimer();
   }
 
@@ -101,16 +102,18 @@ class _OtpViewState extends State<OtpView> {
               SizedBox(height: 16),
               Lottie.asset('assets/lottie/otp1.json', height: 200),
               SizedBox(height: 24),
-              Text('Masukkan Kode OTP', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+              Text('Masukkan Kode OTP',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               SizedBox(height: 8),
-              Text('Kode OTP dikirim ke Email Anda', style: TextStyle(color: Colors.grey[700])),
+              Text('Kode OTP dikirim ke Email Anda',
+                  style: TextStyle(color: Colors.grey[700])),
               SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: List.generate(otpLength, (index) {
                   bool isFocused = focusNodes[index].hasFocus;
                   return AnimatedContainer(
-                    duration: Duration(milliseconds: 250),
+                    duration: Duration(milliseconds: 60),
                     curve: Curves.easeInOut,
                     width: MediaQuery.of(context).size.width / 9,
                     height: 60,
@@ -139,7 +142,8 @@ class _OtpViewState extends State<OtpView> {
                         maxLength: 1,
                         textAlign: TextAlign.center,
                         keyboardType: TextInputType.number,
-                        style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                            fontSize: 22, fontWeight: FontWeight.bold),
                         decoration: InputDecoration(
                           contentPadding: EdgeInsets.zero,
                           counterText: '',
@@ -160,9 +164,9 @@ class _OtpViewState extends State<OtpView> {
               ),
               TextButton(
                 onPressed: _canResend
-                    ? () {
-                        // TODO: Implement resend OTP di backend
-                        startTimer();
+                    ? () async {
+                        await otpControllerGetx.resendOtp(); // <--- Tambahan
+                        startTimer(); // Restart timer setelah kirim ulang
                       }
                     : null,
                 child: Text(
@@ -181,7 +185,9 @@ class _OtpViewState extends State<OtpView> {
                         final otp = getOtp();
                         if (otp.length < otpLength) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Silakan lengkapi OTP terlebih dahulu.')),
+                            SnackBar(
+                                content: Text(
+                                    'Silakan lengkapi OTP terlebih dahulu.')),
                           );
                           return;
                         }

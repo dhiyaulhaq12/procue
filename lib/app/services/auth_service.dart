@@ -109,6 +109,24 @@ class AuthService {
     }
   }
 
+
+  static Future<Map<String, dynamic>> resendOtp(String email) async {
+    final url = Uri.parse('$baseUrl/resend-otp');
+
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email}),
+    );
+
+    final data = jsonDecode(response.body);
+    return {
+      'success': response.statusCode == 200,
+      'message': data['message'],
+    };
+  }
+
+
   static Future<Map<String, dynamic>> getUserData() async {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('token');
