@@ -62,6 +62,8 @@ class AuthService {
           'success': true,
           'message': data['message'] ?? 'Login berhasil',
           'access_token': data['access_token'],
+          'user_id': data['user_id'],
+          'username': data['username'],
         };
       } else {
         return {
@@ -109,7 +111,6 @@ class AuthService {
     }
   }
 
-
   static Future<Map<String, dynamic>> resendOtp(String email) async {
     final url = Uri.parse('$baseUrl/resend-otp');
 
@@ -125,7 +126,6 @@ class AuthService {
       'message': data['message'],
     };
   }
-
 
   static Future<Map<String, dynamic>> getUserData() async {
     final prefs = await SharedPreferences.getInstance();

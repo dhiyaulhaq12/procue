@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -10,12 +9,13 @@ import 'package:image_picker/image_picker.dart';
 
 class EditProfilController extends GetxController {
   final usernameController = TextEditingController();
+  // final emailController = TextEditingController();
   final oldPasswordController = TextEditingController();
   final newPasswordController = TextEditingController();
   final confirmPasswordController = TextEditingController();
 
   var isLoading = false.obs;
-  var selectedImagePath = ''.obs; // path gambar yang dipilih user
+  var selectedImagePath = ''.obs;
 
   final ImagePicker _picker = ImagePicker();
 
@@ -32,11 +32,8 @@ class EditProfilController extends GetxController {
     final authType = box.read('authType') ?? '';
 
     if (authType == 'google') {
-      // Login via Google - ambil data dari local storage
       usernameController.text = box.read('userName') ?? '';
-      // Jika ingin load foto profil Google bisa tambahkan disini
     } else {
-      // Login via backend - ambil data dari API
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('access_token');
 
@@ -55,27 +52,20 @@ class EditProfilController extends GetxController {
         if (response.statusCode == 200) {
           final data = jsonDecode(response.body);
           final user = data['user'];
-          usernameController.text = user['username'] ?? '';
-
-          // Simpan user ID ke SharedPreferences (penting untuk update)
+          usernameController.text = (user['username'] ?? '').toString();
+          // emailController.text = (user['email'] ?? '').toString();
           prefs.setString('user_id', user['_id']);
-
-          // Jika backend mengirim URL foto profil, bisa simpan path ini atau simpan di observable
-          // contoh:
-          // selectedImagePath.value = user['profile_photo_url'] ?? '';
         } else {
-          print('Gagal ambil data user: ${response.body}');
-          Get.snackbar('Gagal', 'Gagal mengambil data user');
+          // Get.snackbar('Gagal', 'Gagal mengambil data user');
         }
       } catch (e) {
-        Get.snackbar('Error', 'Terjadi kesalahan: $e');
+        // Get.snackbar('Error', 'Terjadi kesalahan: $e');
       }
     }
 
     isLoading.value = false;
   }
 
-  // Fungsi untuk pilih gambar dari gallery
   Future<void> pickImage() async {
     try {
       final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
@@ -93,7 +83,6 @@ class EditProfilController extends GetxController {
     isLoading.value = true;
 
     if (authType == 'google') {
-      // Update lokal untuk login Google
       final newUsername = usernameController.text.trim();
       if (newUsername.isNotEmpty) {
         box.write('userName', newUsername);
@@ -105,10 +94,9 @@ class EditProfilController extends GetxController {
       return;
     }
 
-    // Update untuk user non-Google
     final prefs = await SharedPreferences.getInstance();
-    final token = prefs.getString('access_token');
-    final userId = prefs.getString('user_id');
+    final userId = prefs.getString('user_id') ?? '';
+    final token = prefs.getString('access_token') ?? '';
 
     if (token == null || userId == null) {
       Get.snackbar('Error', 'Token atau ID pengguna tidak ditemukan');
@@ -117,13 +105,23 @@ class EditProfilController extends GetxController {
     }
 
     final username = usernameController.text.trim();
+    final oldPassword = oldPasswordController.text.trim();
     final newPassword = newPasswordController.text.trim();
     final confirmPassword = confirmPasswordController.text.trim();
 
-    if (newPassword.isNotEmpty && newPassword != confirmPassword) {
-      Get.snackbar('Error', 'Konfirmasi password tidak cocok');
-      isLoading.value = false;
-      return;
+    if (newPassword.isNotEmpty) {
+      if (oldPassword.isEmpty) {
+        Get.snackbar(
+            'Error', 'Password lama harus diisi untuk mengganti password');
+        isLoading.value = false;
+        return;
+      }
+
+      if (newPassword.isNotEmpty && newPassword != confirmPassword) {
+        Get.snackbar('Error', 'Konfirmasi password tidak cocok');
+        isLoading.value = false;
+        return;
+      }
     }
 
     final uri = Uri.parse('https://backend-billiard.vercel.app/$userId/update');
@@ -132,15 +130,21 @@ class EditProfilController extends GetxController {
 
     if (username.isNotEmpty) request.fields['username'] = username;
     if (newPassword.isNotEmpty) request.fields['password'] = newPassword;
+    if (newPassword.isNotEmpty) {
+      request.fields['old_password'] =oldPassword; // Kirim password lama ke backend
+      request.fields['password'] = newPassword;
+    }
 
-    // Jika user pilih foto baru, tambahkan file foto ke request
     if (selectedImagePath.value.isNotEmpty) {
-      request.files.add(
-        await http.MultipartFile.fromPath(
-          'profile_picture', // nama field untuk foto di backend, sesuaikan jika berbeda
-          selectedImagePath.value,
-        ),
-      );
+      request.files.add(await http.MultipartFile.fromPath(
+        'profile_picture',
+        selectedImagePath.value,
+      ));
+      if (userId.isEmpty || token.isEmpty) {
+        Get.snackbar('Error', 'Token atau ID pengguna tidak ditemukan');
+        isLoading.value = false;
+        return;
+      }
     }
 
     try {
@@ -151,8 +155,6 @@ class EditProfilController extends GetxController {
         Get.snackbar('Sukses', 'Profil berhasil diperbarui');
         newPasswordController.clear();
         confirmPasswordController.clear();
-
-        // Reset image path jika sudah berhasil update
         selectedImagePath.value = '';
       } else {
         final data = jsonDecode(body);

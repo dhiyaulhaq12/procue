@@ -1,5 +1,4 @@
 import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
@@ -12,14 +11,14 @@ class EditProfilView extends GetView<EditProfilController> {
       backgroundColor: Colors.black,
       body: Stack(
         children: [
-          // Kontainer putih bawah
+          // Kontainer Putih
           Positioned(
-            top: 220,
+            top: 180,
             left: 0,
             right: 0,
             bottom: 0,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 40),
+              padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -96,9 +95,9 @@ class EditProfilView extends GetView<EditProfilController> {
             ),
           ),
 
-          // Foto profil bundar dengan icon kamera
+          // Foto Profil Bundar
           Positioned(
-            top: 120,
+            top: 100,
             left: 0,
             right: 0,
             child: Align(
@@ -107,12 +106,8 @@ class EditProfilView extends GetView<EditProfilController> {
                 clipBehavior: Clip.none,
                 children: [
                   Obx(() {
-                    // Jika user sudah pilih foto baru, tampilkan foto baru,
-                    // kalau tidak tampilkan foto default atau yang dari controller
                     final image = controller.selectedImagePath.value.isNotEmpty
-                        ? FileImage(
-                            File(controller.selectedImagePath.value),
-                          )
+                        ? FileImage(File(controller.selectedImagePath.value))
                         : AssetImage('assets/closebridge.png') as ImageProvider;
 
                     return Container(
@@ -126,15 +121,11 @@ class EditProfilView extends GetView<EditProfilController> {
                       ),
                     );
                   }),
-
-                  // Icon kamera kecil di pojok kanan bawah foto profil
                   Positioned(
                     bottom: -5,
                     right: -5,
                     child: GestureDetector(
-                      onTap: () {
-                        controller.pickImage(); // Fungsi untuk pilih gambar dari gallery/camera
-                      },
+                      onTap: () => controller.pickImage(),
                       child: Container(
                         decoration: BoxDecoration(
                           color: Colors.black,
