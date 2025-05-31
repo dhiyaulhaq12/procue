@@ -126,7 +126,7 @@ class AppPages {
       binding: OtpBinding(),
     ),
     GetPage(
-      name: _Paths.EDIT_PROFIL,
+      name: '/edit-profile',
       page: () => EditProfilView(),
       binding: EditProfilBinding(),
     ),
