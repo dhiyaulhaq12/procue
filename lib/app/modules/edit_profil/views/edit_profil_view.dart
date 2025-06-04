@@ -108,7 +108,7 @@ class EditProfilView extends GetView<EditProfilController> {
                   Obx(() {
                     final image = controller.selectedImagePath.value.isNotEmpty
                         ? FileImage(File(controller.selectedImagePath.value))
-                        : AssetImage('assets/closebridge.png') as ImageProvider;
+                        : AssetImage('assets/images/banner.jpg') as ImageProvider;
 
                     return Container(
                       decoration: BoxDecoration(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:lottie/lottie.dart';
 
 class DashboardView extends GetView {
   @override
@@ -25,7 +26,7 @@ class DashboardView extends GetView {
                   ),
                 ),
                 Image.asset(
-                  'assets/images/banner.jpg', // Ganti sesuai kebutuhan
+                  'assets/images/banner.jpg',
                   height: 150,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -34,7 +35,26 @@ class DashboardView extends GetView {
             ),
           ),
 
-          // Kontainer Putih seperti di RiwayatView
+          // ✅ Lottie tetap di bg hitam
+          Positioned(
+            top: 20,
+            right: 20,
+            child: GestureDetector(
+              onTap: () {
+                Get.toNamed('/statistik');
+              },
+              child: SizedBox(
+                height: 80,
+                width: 80,
+                child: Lottie.asset(
+                  'assets/lottie/statistikbar.json',
+                  fit: BoxFit.contain,
+                ),
+              ),
+            ),
+          ),
+
+          // Kontainer putih seperti sebelumnya
           Positioned(
             top: 220,
             left: 0,

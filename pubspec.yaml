@@ -43,6 +43,7 @@ dependencies:
   firebase_core: ^2.27.0
   firebase_auth: ^4.15.0
   google_sign_in: ^5.4.4
+  fl_chart: ^0.66.1
 
 
 
@@ -79,6 +80,9 @@ flutter:
     - assets/lottie/otp.json
     - assets/lottie/otp1.json
     - assets/images/google.png
+    - assets/lottie/statistik.json
+    - assets/lottie/statistikbar.json
+
 
     
 

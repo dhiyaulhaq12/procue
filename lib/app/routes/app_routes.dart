@@ -20,6 +20,7 @@ abstract class Routes {
   static const OTP = _Paths.OTP;
   static const EDIT_PROFIL = _Paths.EDIT_PROFIL;
   static const EDIT_PASSWORD = _Paths.EDIT_PASSWORD;
+  static const STATISTIK = _Paths.STATISTIK;
 }
 
 abstract class _Paths {
@@ -42,4 +43,5 @@ abstract class _Paths {
   static const OTP = '/otp';
   static const EDIT_PROFIL = '/edit-profil';
   static const EDIT_PASSWORD = '/edit-password';
+  static const STATISTIK = '/statistik';
 }
