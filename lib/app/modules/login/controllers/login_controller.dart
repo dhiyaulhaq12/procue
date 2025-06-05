@@ -76,6 +76,7 @@ class LoginController extends GetxController {
       final box = GetStorage();
       box.write('userName', googleUser.displayName);
       box.write('userEmail', googleUser.email);
+      box.write('profilePicture', googleUser.photoUrl); // ✅ simpan foto
       box.write('userPassword', '*******'); // Kosong karena Google login
       box.write('authType', 'google'); // Buat pembeda
 

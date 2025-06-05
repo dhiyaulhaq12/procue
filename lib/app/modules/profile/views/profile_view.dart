@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/profile_controller.dart';
@@ -7,35 +8,35 @@ class ProfileView extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        titleSpacing: 0,
+        title: const Padding(
+          padding: EdgeInsets.only(left: 16), // jarak kiri 16 untuk konsisten
+          child: Text(
+            'Profile',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        elevation: 0,
+      ),
       body: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Judul Halaman "Profil"
-          Positioned(
-            top: 60,
-            left: 0,
-            right: 0,
-            child: Align(
-              alignment: Alignment.center,
-              child: Text(
-                'Profile',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 26,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
+          // Hilangkan bagian Positioned untuk judul yang lama,
+          // karena sudah pakai AppBar
 
-          // Kontainer putih dengan isi profil
           Positioned(
-            top: 220,
+            top: 100, // geser ke atas karena appBar sudah ada
             left: 0,
             right: 0,
             bottom: 0,
             child: Container(
-              padding: const EdgeInsets.fromLTRB(20, 50, 20, 20), // ada space untuk foto
+              padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -46,7 +47,6 @@ class ProfileView extends GetView<ProfileController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // Username reactive
                   Obx(() => Text(
                         controller.username.value.isEmpty
                             ? 'Loading...'
@@ -57,8 +57,6 @@ class ProfileView extends GetView<ProfileController> {
                         ),
                       )),
                   const SizedBox(height: 12),
-
-                  // Tombol Edit Profil
                   ElevatedButton.icon(
                     onPressed: () {
                       Get.toNamed('/edit-profile');
@@ -77,8 +75,6 @@ class ProfileView extends GetView<ProfileController> {
                     label: const Text("Edit Profil"),
                   ),
                   const SizedBox(height: 24),
-
-                  // Info box
                   Container(
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
@@ -110,8 +106,8 @@ class ProfileView extends GetView<ProfileController> {
                               },
                             );
                           },
-                          child: _infoTile(
-                              icon: Icons.logout, value: 'Log Out'),
+                          child:
+                              _infoTile(icon: Icons.logout, value: 'Log Out'),
                         ),
                       ],
                     ),
@@ -121,9 +117,8 @@ class ProfileView extends GetView<ProfileController> {
             ),
           ),
 
-          // Foto profil bundar (setengah di atas kontainer putih)
           Positioned(
-            top: 120, // posisinya lebih rendah dari sebelumnya
+            top: 20, // posisinya sedikit lebih atas karena appBar ada
             left: 0,
             right: 0,
             child: Align(
@@ -133,16 +128,34 @@ class ProfileView extends GetView<ProfileController> {
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white, width: 4),
                 ),
-                child: CircleAvatar(
-                  radius: 60,
-                  backgroundImage: AssetImage('assets/images/banner.jpg'),
-                  backgroundColor: Colors.grey[300],
-                ),
+                child: Obx(() {
+                  ImageProvider image;
+                  if (controller.profilePictureUrl.value.isNotEmpty) {
+                    if (controller.profilePictureUrl.value.startsWith('http')) {
+                      image = NetworkImage(controller.profilePictureUrl.value);
+                    } else {
+                      image =
+                          FileImage(File(controller.profilePictureUrl.value));
+                    }
+                  } else {
+                    image = AssetImage('assets/images/profile.png');
+                  }
+                  return CircleAvatar(
+                    radius: 60,
+                    backgroundImage: image,
+                    backgroundColor: Colors.grey[300],
+                    onBackgroundImageError: (exception, stackTrace) {
+                      print('Error loading profile image: $exception');
+                    },
+                    child: controller.profilePictureUrl.value.isEmpty
+                        ? Icon(Icons.person, size: 60, color: Colors.grey[400])
+                        : null,
+                  );
+                }),
               ),
             ),
           ),
 
-          // Bottom Navigation Bar
           Positioned(
             left: 20,
             right: 20,

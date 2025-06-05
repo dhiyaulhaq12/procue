@@ -15,10 +15,17 @@ class StatistikView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black, // <-- background hitam
+      backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text('Statistik Data Billiard Youtube'),
-        centerTitle: true,
+        title: const Text(
+          'Statistik Data Billiard Youtube',
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        titleSpacing: 0, // <--- ini bikin judul nempel ke kiri
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),

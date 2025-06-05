@@ -9,16 +9,25 @@ class EditProfilView extends GetView<EditProfilController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        title: const Text(
+          'Edit Profil',
+          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+        ),
+        elevation: 0,
+      ),
       body: Stack(
+        clipBehavior: Clip.none,
         children: [
-          // Kontainer Putih
           Positioned(
-            top: 180,
+            top: 100,
             left: 0,
             right: 0,
             bottom: 0,
             child: Container(
-              padding: const EdgeInsets.fromLTRB(20, 70, 20, 20),
+              padding: const EdgeInsets.fromLTRB(20, 50, 20, 20),
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.only(
@@ -30,7 +39,6 @@ class EditProfilView extends GetView<EditProfilController> {
                 if (controller.isLoading.value) {
                   return const Center(child: CircularProgressIndicator());
                 }
-
                 return SingleChildScrollView(
                   child: Column(
                     children: [
@@ -97,7 +105,7 @@ class EditProfilView extends GetView<EditProfilController> {
 
           // Foto Profil Bundar
           Positioned(
-            top: 100,
+            top: 20,
             left: 0,
             right: 0,
             child: Align(
@@ -106,9 +114,22 @@ class EditProfilView extends GetView<EditProfilController> {
                 clipBehavior: Clip.none,
                 children: [
                   Obx(() {
-                    final image = controller.selectedImagePath.value.isNotEmpty
-                        ? FileImage(File(controller.selectedImagePath.value))
-                        : AssetImage('assets/images/banner.jpg') as ImageProvider;
+                    ImageProvider image;
+
+                    if (controller.selectedImagePath.value.isNotEmpty) {
+                      image =
+                          FileImage(File(controller.selectedImagePath.value));
+                    } else if (controller.profilePictureUrl.value.isNotEmpty) {
+                      if (controller.profilePictureUrl.value.startsWith('http')) {
+                        image =
+                            NetworkImage(controller.profilePictureUrl.value);
+                      } else {
+                        image =
+                            FileImage(File(controller.profilePictureUrl.value));
+                      }
+                    } else {
+                      image = AssetImage('assets/images/profile.png');
+                    }
 
                     return Container(
                       decoration: BoxDecoration(
@@ -118,6 +139,15 @@ class EditProfilView extends GetView<EditProfilController> {
                       child: CircleAvatar(
                         radius: 60,
                         backgroundImage: image,
+                        backgroundColor: Colors.grey[300],
+                        onBackgroundImageError: (exception, stackTrace) {
+                          print('Error loading image: $exception');
+                        },
+                        child: controller.selectedImagePath.value.isEmpty &&
+                                controller.profilePictureUrl.value.isEmpty
+                            ? Icon(Icons.person,
+                                size: 60, color: Colors.grey[400])
+                            : null,
                       ),
                     );
                   }),

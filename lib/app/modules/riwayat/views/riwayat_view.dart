@@ -23,7 +23,8 @@ class _RiwayatViewState extends State<RiwayatView> {
     {
       'judul': 'Rail Bridge',
       'imagePath': 'assets/images/railbridge.jpg',
-      'deskripsi': 'Posisi jari membentuk jembatan untuk menopang stik saat membidik.',
+      'deskripsi':
+          'Posisi jari membentuk jembatan untuk menopang stik saat membidik.',
     },
   ];
 
@@ -58,15 +59,25 @@ class _RiwayatViewState extends State<RiwayatView> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Padding(
-                  padding: EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-                  child: Text(
-                    'Riwayat Deteksi',
-                    style: TextStyle(
-                      fontSize: 26,
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
+                  child: Row(
+                    children: [
+                      GestureDetector(
+                        onTap: () => Get.back(),
+                        child:
+                            const Icon(Icons.arrow_back, color: Colors.white),
+                      ),
+                      const SizedBox(width: 10),
+                      const Text(
+                        'Riwayat Deteksi',
+                        style: TextStyle(
+                          fontSize: 22,
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
                 Image.asset(

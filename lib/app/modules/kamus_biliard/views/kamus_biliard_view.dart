@@ -7,45 +7,36 @@ class KamusBiliardView extends GetView<KamusBiliardController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(  
+    return Scaffold(
       backgroundColor: Colors.black,
+      appBar: AppBar(
+        title: const Text('Kamus Billiard'),
+        backgroundColor: Colors.black,
+        foregroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Get.back(),
+        ),
+      ),
       body: Stack(
         children: [
-          // Header hitam
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
-                      Text(
-                        'Kamus Billiard',
-                        style: TextStyle(
-                          fontSize: 26,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 10),
-                    ],
-                  ),
-                ),
-                Image.asset(
-                  'assets/images/banner.jpg',
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ],
+          // Banner di atas
+          Positioned(
+            top: 0,
+            left: 0,
+            right: 0,
+            child: Image.asset(
+              'assets/images/banner.jpg',
+              height: 150,
+              width: double.infinity,
+              fit: BoxFit.cover,
             ),
           ),
 
           // Container putih dengan lengkungan di atas
           Positioned(
-            top: 220, // agar gambar lebih terlihat
+            top: 140, // sedikit di bawah banner
             left: 0,
             right: 0,
             bottom: 0,
@@ -59,7 +50,16 @@ class KamusBiliardView extends GetView<KamusBiliardController> {
                 ),
               ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // const Text(
+                  //   "KATEGORI KAMUS",
+                  //   style: TextStyle(
+                  //     fontWeight: FontWeight.bold,
+                  //     fontSize: 16,
+                  //   ),
+                  // ),
+                  const SizedBox(height: 16),
                   buildMenuButton('Teknik Pukulan', '/teknik_pukulan'),
                   buildMenuButton('Peralatan', '/peralatan'),
                   buildMenuButton('Aturan Permainan', '/aturan_permainan'),
@@ -96,7 +96,7 @@ class KamusBiliardView extends GetView<KamusBiliardController> {
     );
   }
 
-  // Ubah buildMenuButton agar bisa navigasi
+  // Tombol Menu Kamus
   Widget buildMenuButton(String title, String route) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
