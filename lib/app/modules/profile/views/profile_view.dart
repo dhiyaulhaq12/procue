@@ -58,8 +58,12 @@ class ProfileView extends GetView<ProfileController> {
                       )),
                   const SizedBox(height: 12),
                   ElevatedButton.icon(
-                    onPressed: () {
-                      Get.toNamed('/edit-profile');
+                    onPressed: () async {
+                      await Get.toNamed('/edit-profile');
+                      controller
+                          .fetchUserData(); // muat ulang data setelah kembali
+                      controller
+                          .loadSavedProfilePicture(); // muat ulang foto profil
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.grey[100],
