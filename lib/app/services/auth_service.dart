@@ -41,7 +41,7 @@ class AuthService {
   }
 
   static Future<Map<String, dynamic>> login(
-      String email, String password) async {
+      String email, String password, String platform) async {
     try {
       final response = await http.post(
         Uri.parse('$baseUrl/login'),
@@ -49,6 +49,8 @@ class AuthService {
         body: jsonEncode({
           'email': email,
           'password': password,
+          'platform': platform, // ✅ dikirim ke backend
+
         }),
       );
 

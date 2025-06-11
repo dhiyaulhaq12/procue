@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 
 import '../modules/about/bindings/about_binding.dart';
 import '../modules/about/views/about_view.dart';
+import '../modules/aktifitas_login/bindings/aktifitas_login_binding.dart';
+import '../modules/aktifitas_login/views/aktifitas_login_view.dart';
 import '../modules/aturan_permainan/bindings/aturan_permainan_binding.dart';
 import '../modules/aturan_permainan/views/aturan_permainan_view.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
@@ -141,6 +143,11 @@ class AppPages {
       name: '/statistik',
       page: () => StatistikView(),
       binding: StatistikBinding(),
+    ),
+    GetPage(
+      name: '/aktifitas-login',
+      page: () => LoginActivityView(),
+      binding: AktifitasLoginBinding(),
     ),
   ];
 }

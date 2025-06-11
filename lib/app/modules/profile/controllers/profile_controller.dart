@@ -3,23 +3,48 @@ import 'package:get_storage/get_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:io';
 
 class ProfileController extends GetxController {
   var username = ''.obs;
   var email = ''.obs;
-  var profilePictureUrl = ''.obs; // Tambahkan untuk foto profil
+  var profilePictureUrl = ''.obs;
+
+  final String baseUrl = 'https://backend-billiard.vercel.app';
 
   @override
   void onInit() {
     super.onInit();
-    loadSavedProfilePicture(); // Load foto tersimpan dulu
+    loadSavedProfilePicture();
     fetchUserData();
   }
 
   @override
   void onReady() {
     super.onReady();
-    loadSavedProfilePicture(); // Load ulang foto saat halaman ready
+    loadSavedProfilePicture();
+  }
+
+  // Method untuk mendapatkan informasi device
+  Future<String> getDeviceInfo() async {
+    try {
+      final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
+      
+      if (Platform.isAndroid) {
+        final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
+        return '${androidInfo.brand} ${androidInfo.model}';
+      } else if (Platform.isIOS) {
+        final IosDeviceInfo iosInfo = await deviceInfo.iosInfo;
+        return '${iosInfo.name} ${iosInfo.model}';
+      } else {
+        return 'Unknown Device';
+      }
+    } catch (e) {
+      print('Error getting device info: $e');
+      return 'Unknown Device';
+    }
   }
 
   // Method untuk memuat foto profil yang tersimpan
@@ -76,7 +101,7 @@ class ProfileController extends GetxController {
 
       try {
         final response = await http.get(
-          Uri.parse('https://backend-billiard.vercel.app/user'),
+          Uri.parse('$baseUrl/user'),
           headers: {'Authorization': 'Bearer $token'},
         );
 
@@ -116,13 +141,94 @@ class ProfileController extends GetxController {
     print('authType: ${box.read('authType')}');
   }
 
+  // Method logout yang lengkap dengan API call
   void logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    final box = GetStorage();
-
-    await prefs.remove('access_token');
-    await box.erase(); // Hapus semua data GetStorage
-
-    Get.offAllNamed('/login');
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final box = GetStorage();
+      
+      // Ambil token sebelum dihapus
+      final token = prefs.getString('access_token');
+      
+      // Hanya panggil API logout jika menggunakan token (bukan Google login)
+      final authType = box.read('authType') ?? '';
+      
+      if (token != null && authType != 'google') {
+        // Dapatkan informasi device secara dinamis
+        final deviceInfo = await getDeviceInfo();
+        
+        // Panggil API logout untuk mencatat logout di backend
+        try {
+          final response = await http.post(
+            Uri.parse('$baseUrl/logout'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer $token',
+            },
+            body: jsonEncode({
+              'platform': deviceInfo, // Menggunakan device info yang dinamis
+            }),
+          );
+          
+          print('Device Info: $deviceInfo');
+          print('Logout API response: ${response.statusCode}');
+          print('Logout API body: ${response.body}');
+          
+          if (response.statusCode == 200) {
+            print('Logout berhasil dicatat di backend');
+          } else {
+            print('Logout API gagal: ${response.body}');
+          }
+        } catch (apiError) {
+          print('Error calling logout API: $apiError');
+          // Tetap lanjutkan proses logout meskipun API gagal
+        }
+      }
+      
+      // Hapus semua data lokal (dilakukan terlepas dari response API)
+      await prefs.remove('access_token');
+      await prefs.remove('profile_picture');
+      await box.erase(); // Hapus semua data GetStorage
+      
+      // Navigasi ke halaman login dan hapus semua route sebelumnya
+      Get.offAllNamed('/login');
+      
+      // Tampilkan pesan sukses
+      Get.snackbar(
+        'Berhasil',
+        'Logout berhasil',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+        duration: Duration(seconds: 2),
+      );
+      
+    } catch (e) {
+      print('Error during logout: $e');
+      
+      // Jika terjadi error, tetap hapus data lokal untuk keamanan
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final box = GetStorage();
+        await prefs.remove('access_token');
+        await prefs.remove('profile_picture');
+        await box.erase();
+        
+        Get.offAllNamed('/login');
+        
+        Get.snackbar(
+          'Peringatan',
+          'Logout berhasil (mode offline)',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+          duration: Duration(seconds: 2),
+        );
+      } catch (cleanupError) {
+        print('Error during cleanup: $cleanupError');
+        // Paksa navigasi ke login jika semua gagal
+        Get.offAllNamed('/login');
+      }
+    }
   }
 }

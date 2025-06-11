@@ -4,7 +4,8 @@ import 'package:get_storage/get_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-
+import 'package:device_info_plus/device_info_plus.dart';
+import 'dart:io';
 import '../../../services/auth_service.dart';
 
 class LoginController extends GetxController {
@@ -20,8 +21,8 @@ class LoginController extends GetxController {
       Get.snackbar('Gagal', 'Email dan password wajib diisi');
       return;
     }
-
-    final response = await AuthService.login(email, password);
+    final platform = await getPlatformInfo(); // ✅ ambil info device
+    final response = await AuthService.login(email, password, platform); // 🔄 kirim ke service
 
     // Ambil nilai-nilai dari response
     final accessToken = response['access_token'];
@@ -90,6 +91,18 @@ class LoginController extends GetxController {
       print("Error saat login Google: $e");
       Get.snackbar("Error", "Terjadi kesalahan saat login: $e");
     }
+  }
+
+  Future<String> getPlatformInfo() async {
+    final deviceInfo = DeviceInfoPlugin();
+    if (Platform.isAndroid) {
+      final androidInfo = await deviceInfo.androidInfo;
+      return '${androidInfo.brand} ${androidInfo.model}';
+    } else if (Platform.isIOS) {
+      final iosInfo = await deviceInfo.iosInfo;
+      return '${iosInfo.name} ${iosInfo.model}';
+    }
+    return 'unknown device';
   }
 
   @override

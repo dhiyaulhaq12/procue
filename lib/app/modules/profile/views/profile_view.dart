@@ -78,6 +78,24 @@ class ProfileView extends GetView<ProfileController> {
                     icon: const Icon(Icons.edit, size: 18),
                     label: const Text("Edit Profil"),
                   ),
+                  ElevatedButton.icon(
+                    onPressed: () {
+                      Get.toNamed('/aktifitas-login');
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.grey[100],
+                      foregroundColor: Colors.black,
+                      elevation: 1,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                    ),
+                    icon: const Icon(Icons.history, size: 18),
+                    label: const Text("Aktivitas Login"),
+                  ),
+                  const SizedBox(height: 24),
                   const SizedBox(height: 24),
                   Container(
                     padding: const EdgeInsets.all(16),
