@@ -86,7 +86,7 @@ class EditProfilView extends GetView<EditProfilController> {
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.black,
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 150, vertical: 15),
+                              horizontal: 140, vertical: 15),
                           shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(15),
                           ),

@@ -1,5 +1,6 @@
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter/material.dart';
 import 'dart:convert';
@@ -22,34 +23,55 @@ class LoginActivityController extends GetxController {
       // Inisialisasi ulang GetStorage untuk memastikan data terbaca
       await GetStorage.init();
       final box = GetStorage();
+      final prefs = await SharedPreferences.getInstance();
       
       // Cek jenis auth terlebih dahulu
       final authType = box.read('authType');
       print('=== DEBUG ACTIVITY CONTROLLER ===');
       print('Auth Type: $authType');
       
+      String? token;
+      
+      // Ambil token sesuai dengan jenis auth
       if (authType == 'google') {
-        // Untuk Google login, tidak ada activity logs dari backend
-        print('Google login detected - no backend activity logs available');
-        activityLogs.value = [];
-        Get.snackbar(
-          'Info', 
-          'Activity logs hanya tersedia untuk login manual',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-        );
-        return;
+        // Untuk Google login, coba ambil token dari GetStorage atau SharedPreferences
+        token = box.read('access_token') ?? prefs.getString('access_token');
+        
+        // Jika tidak ada token untuk Google login, buat activity log lokal
+        if (token == null || token.isEmpty) {
+          print('Google login tanpa backend token - buat activity log lokal');
+          
+          // Buat activity log lokal untuk Google login
+          final googleLoginTime = box.read('google_login_time') ?? DateTime.now().toIso8601String();
+          final userEmail = box.read('userEmail') ?? 'Unknown';
+          
+          activityLogs.value = [
+            {
+              'id': 'google_${DateTime.now().millisecondsSinceEpoch}',
+              'platform': 'Google Login',
+              'last_activity': googleLoginTime,
+              'ip_address': 'Google Auth',
+              'logout_time': null, // Google login masih aktif
+              'status': 'active',
+              'user_email': userEmail,
+            }
+          ];
+          
+          Get.snackbar(
+            'Info', 
+            'Menampilkan aktivitas Google login',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.blue,
+            colorText: Colors.white,
+          );
+          return;
+        }
+      } else {
+        // Login manual via token JWT
+        token = box.read('access_token') ?? prefs.getString('access_token');
       }
       
-      // Ambil token menggunakan key 'access_token' sesuai login controller
-      final token = box.read('access_token');
-      final userId = box.read('user_id');
-      final username = box.read('username');
-      
       print('Access Token: $token');
-      print('User ID: $userId');
-      print('Username: $username');
       print('Token null?: ${token == null}');
       print('Token empty?: ${token?.isEmpty}');
       
@@ -84,6 +106,17 @@ class LoginActivityController extends GetxController {
         if (jsonData['logs'] != null) {
           activityLogs.value = jsonData['logs'];
           print('Data logs berhasil dimuat: ${jsonData['logs'].length} items');
+          
+          // Jika Google login dan ada data dari backend, tambahkan info Google
+          if (authType == 'google') {
+            // Tambahkan marker bahwa ini dari Google login
+            for (var log in activityLogs) {
+              if (log['platform'] == null || log['platform'].toString().isEmpty) {
+                log['platform'] = 'Google Login (Backend)';
+              }
+            }
+          }
+          
           Get.snackbar(
             'Success', 
             'Data aktivitas berhasil dimuat',
@@ -92,24 +125,68 @@ class LoginActivityController extends GetxController {
             colorText: Colors.white,
           );
         } else {
-          activityLogs.value = [];
+          // Jika tidak ada data dari backend tapi Google login
+          if (authType == 'google') {
+            final googleLoginTime = box.read('google_login_time') ?? DateTime.now().toIso8601String();
+            final userEmail = box.read('userEmail') ?? 'Unknown';
+            
+            activityLogs.value = [
+              {
+                'id': 'google_local_${DateTime.now().millisecondsSinceEpoch}',
+                'platform': 'Google Login (Local)',
+                'last_activity': googleLoginTime,
+                'ip_address': 'Google Auth',
+                'logout_time': null,
+                'status': 'active',
+                'user_email': userEmail,
+              }
+            ];
+          } else {
+            activityLogs.value = [];
+          }
+          
           Get.snackbar(
             'Info', 
-            'Tidak ada data aktivitas',
+            'Tidak ada data aktivitas dari server',
             snackPosition: SnackPosition.TOP,
           );
         }
       } else if (response.statusCode == 401) {
         print('Token expired atau tidak valid');
-        Get.snackbar(
-          'Error', 
-          'Token tidak valid. Silakan login ulang.',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.red,
-          colorText: Colors.white,
-        );
-        // Optional: redirect ke halaman login
-        // Get.offAllNamed('/login');
+        
+        // Jika Google login dan token invalid, tetap tampilkan aktivitas lokal
+        if (authType == 'google') {
+          final googleLoginTime = box.read('google_login_time') ?? DateTime.now().toIso8601String();
+          final userEmail = box.read('userEmail') ?? 'Unknown';
+          
+          activityLogs.value = [
+            {
+              'id': 'google_fallback_${DateTime.now().millisecondsSinceEpoch}',
+              'platform': 'Google Login (Fallback)',
+              'last_activity': googleLoginTime,
+              'ip_address': 'Google Auth',
+              'logout_time': null,
+              'status': 'active',
+              'user_email': userEmail,
+            }
+          ];
+          
+          Get.snackbar(
+            'Info', 
+            'Menampilkan aktivitas Google login (mode fallback)',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+          );
+        } else {
+          Get.snackbar(
+            'Error', 
+            'Token tidak valid. Silakan login ulang.',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
       } else if (response.statusCode == 422) {
         final errorData = json.decode(response.body);
         print('Error 422: ${errorData}');
@@ -122,23 +199,80 @@ class LoginActivityController extends GetxController {
         );
       } else {
         print('Server error: ${response.statusCode}');
+        
+        // Fallback untuk Google login jika server error
+        if (authType == 'google') {
+          final googleLoginTime = box.read('google_login_time') ?? DateTime.now().toIso8601String();
+          final userEmail = box.read('userEmail') ?? 'Unknown';
+          
+          activityLogs.value = [
+            {
+              'id': 'google_error_${DateTime.now().millisecondsSinceEpoch}',
+              'platform': 'Google Login (Offline)',
+              'last_activity': googleLoginTime,
+              'ip_address': 'Google Auth',
+              'logout_time': null,
+              'status': 'active',
+              'user_email': userEmail,
+            }
+          ];
+          
+          Get.snackbar(
+            'Warning', 
+            'Server tidak dapat diakses, menampilkan aktivitas lokal',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.orange,
+            colorText: Colors.white,
+          );
+        } else {
+          Get.snackbar(
+            'Error', 
+            'Gagal mengakses server: ${response.statusCode}',
+            snackPosition: SnackPosition.TOP,
+            backgroundColor: Colors.red,
+            colorText: Colors.white,
+          );
+        }
+      }
+    } catch (e) {
+      print('Exception: $e');
+      
+      // Fallback untuk Google login jika terjadi exception
+      final box = GetStorage();
+      final authType = box.read('authType');
+      
+      if (authType == 'google') {
+        final googleLoginTime = box.read('google_login_time') ?? DateTime.now().toIso8601String();
+        final userEmail = box.read('userEmail') ?? 'Unknown';
+        
+        activityLogs.value = [
+          {
+            'id': 'google_exception_${DateTime.now().millisecondsSinceEpoch}',
+            'platform': 'Google Login (Exception)',
+            'last_activity': googleLoginTime,
+            'ip_address': 'Google Auth',
+            'logout_time': null,
+            'status': 'active',
+            'user_email': userEmail,
+          }
+        ];
+        
+        Get.snackbar(
+          'Warning', 
+          'Terjadi kesalahan koneksi, menampilkan aktivitas lokal',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.orange,
+          colorText: Colors.white,
+        );
+      } else {
         Get.snackbar(
           'Error', 
-          'Gagal mengakses server: ${response.statusCode}',
+          'Terjadi kesalahan: $e',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
           colorText: Colors.white,
         );
       }
-    } catch (e) {
-      print('Exception: $e');
-      Get.snackbar(
-        'Error', 
-        'Terjadi kesalahan: $e',
-        snackPosition: SnackPosition.TOP,
-        backgroundColor: Colors.red,
-        colorText: Colors.white,
-      );
     } finally {
       isLoading.value = false;
       print('Loading selesai');
@@ -150,8 +284,23 @@ class LoginActivityController extends GetxController {
     try {
       isDeleting.value = true;
       
+      // Cek jika ini adalah Google login log lokal
+      if (logId.startsWith('google_')) {
+        // Hapus dari list lokal saja (tidak ada di backend)
+        activityLogs.removeAt(index);
+        Get.snackbar(
+          'Success', 
+          'Log aktivitas Google berhasil dihapus (lokal)',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        return;
+      }
+      
       final box = GetStorage();
-      final token = box.read('access_token');
+      final prefs = await SharedPreferences.getInstance();
+      final token = box.read('access_token') ?? prefs.getString('access_token');
       
       if (token == null || token.isEmpty) {
         Get.snackbar(
@@ -232,7 +381,27 @@ class LoginActivityController extends GetxController {
       isDeleting.value = true;
       
       final box = GetStorage();
-      final token = box.read('access_token');
+      final authType = box.read('authType');
+      
+      // Jika semua log adalah Google login lokal
+      bool hasOnlyGoogleLogs = activityLogs.every((log) => 
+        log['id'].toString().startsWith('google_'));
+      
+      if (hasOnlyGoogleLogs) {
+        // Clear list lokal saja
+        activityLogs.clear();
+        Get.snackbar(
+          'Success', 
+          'Semua log aktivitas Google berhasil dihapus (lokal)',
+          snackPosition: SnackPosition.TOP,
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+        return;
+      }
+      
+      final prefs = await SharedPreferences.getInstance();
+      final token = box.read('access_token') ?? prefs.getString('access_token');
       
       if (token == null || token.isEmpty) {
         Get.snackbar(
@@ -369,5 +538,12 @@ class LoginActivityController extends GetxController {
     final box = GetStorage();
     box.erase();
     print('Storage cleared');
+  }
+
+  // Method untuk save Google login time (panggil saat Google login berhasil)
+  void saveGoogleLoginTime() {
+    final box = GetStorage();
+    box.write('google_login_time', DateTime.now().toIso8601String());
+    print('Google login time saved: ${DateTime.now().toIso8601String()}');
   }
 }
