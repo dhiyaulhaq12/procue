@@ -111,7 +111,7 @@ class AppPages {
     ),
     GetPage(
       name: '/deteksi',
-      page: () => const DeteksiView(),
+      page: () => DeteksiView(),
       binding: DeteksiBinding(),
     ),
     GetPage(
