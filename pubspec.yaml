@@ -28,6 +28,9 @@ environment:
 # the latest version available on pub.dev. To see which dependencies have newer
 # versions available, run `flutter pub outdated`.
 dependencies:
+
+  syncfusion_flutter_charts: ^22.2.8
+  
   flutter:
     sdk: flutter
   get: ^4.6.6
@@ -69,6 +72,7 @@ flutter:
 
   assets:
     - assets/images/deteksi.jpeg
+    - assets/images/close_bridge.jpeg
     - assets/images/kamus.jpg
     - assets/images/riwayat.jpeg
     - assets/images/tutorial.jpg
@@ -88,9 +92,7 @@ flutter:
     - assets/lottie/statistik.json
     - assets/lottie/statistikbar.json
     - assets/images/profile.png
-    - assets/models/OpenBridge.tflite
-    - assets/models/CloseBridge.tflite
-    - assets/models/RailBridge.tflite
+    - assets/models/model.tflite
     - assets/labels/label.txt
 
 

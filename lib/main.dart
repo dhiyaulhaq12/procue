@@ -1,3 +1,4 @@
+import 'package:aplikasi_pelatihan_billiard_cerdas/app/modules/open_bridge/controllers/open_bridge_controller.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -15,6 +16,7 @@ void main() async {
 
   // Tambahkan controller login sebagai permanent
   Get.put(LoginController(), permanent: true);
+  Get.lazyPut(()=> OpenBridgeController());
 
   runApp(
     GetMaterialApp(

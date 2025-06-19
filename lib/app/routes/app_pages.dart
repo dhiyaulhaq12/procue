@@ -6,6 +6,8 @@ import '../modules/aktifitas_login/bindings/aktifitas_login_binding.dart';
 import '../modules/aktifitas_login/views/aktifitas_login_view.dart';
 import '../modules/aturan_permainan/bindings/aturan_permainan_binding.dart';
 import '../modules/aturan_permainan/views/aturan_permainan_view.dart';
+import '../modules/close_bridge/bindings/close_bridge_binding.dart';
+import '../modules/close_bridge/views/close_bridge_view.dart';
 import '../modules/dashboard/bindings/dashboard_binding.dart';
 import '../modules/dashboard/views/dashboard_view.dart';
 import '../modules/deteksi/bindings/deteksi_binding.dart';
@@ -24,12 +26,16 @@ import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
 import '../modules/on_boarding/bindings/on_boarding_binding.dart';
 import '../modules/on_boarding/views/on_boarding_view.dart';
+import '../modules/open_bridge/bindings/open_bridge_binding.dart';
+import '../modules/open_bridge/views/open_bridge_view.dart';
 import '../modules/otp/bindings/otp_binding.dart';
 import '../modules/otp/views/otp_view.dart';
 import '../modules/peralatan/bindings/peralatan_binding.dart';
 import '../modules/peralatan/views/peralatan_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
+import '../modules/rail_bridge/bindings/rail_bridge_binding.dart';
+import '../modules/rail_bridge/views/rail_bridge_view.dart';
 import '../modules/register/bindings/register_binding.dart';
 import '../modules/register/views/register_view.dart';
 import '../modules/riwayat/bindings/riwayat_binding.dart';
@@ -148,6 +154,21 @@ class AppPages {
       name: '/aktifitas-login',
       page: () => LoginActivityView(),
       binding: AktifitasLoginBinding(),
+    ),
+    GetPage(
+      name: '/close_bridge',
+      page: () => const CloseBridgeView(),
+      binding: DeteksiBinding(),
+    ),
+    GetPage(
+      name: '/open_bridge',
+      page: () => const OpenBridgeView(),
+      binding: DeteksiBinding(),
+    ),
+    GetPage(
+      name: '/rail_bridge',
+      page: () => const RailBridgeView(),
+      binding: DeteksiBinding(),
     ),
   ];
 }

@@ -1,172 +1,128 @@
-import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:aplikasi_pelatihan_billiard_cerdas/app/modules/deteksi/controllers/deteksi_controller.dart';
 
-class DeteksiView extends GetView<DeteksiController> {
+class DeteksiView extends StatelessWidget {
   const DeteksiView({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          // Background image
-          Image.asset(
-            'assets/images/deteksinew.jpg',
-            fit: BoxFit.cover,
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: const Text('Pilih Teknik Bridge'),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        foregroundColor: Colors.black,
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Color.fromARGB(255, 255, 255, 255), Color(0xFFFFF5F7)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
           ),
-
-          // Overlay gelap transparan
-          Container(
-            color: Colors.black.withOpacity(0.4),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 100, 16, 16),
+          child: ListView(
+            children: [
+              BridgeCard(
+                title: 'Open Bridge',
+                description: 'Teknik standar untuk pukulan lurus dan kontrol bola.',
+                imagePath: 'assets/images/openbridge.jpg',
+                onTap: () {
+                print('OpenBridge tapped');
+                Get.toNamed('/open_bridge');
+              },
+              ),
+              const SizedBox(height: 16),
+              BridgeCard(
+                title: 'Close Bridge',
+                description: 'Cocok untuk stabilitas tinggi saat pukulan keras.',
+                imagePath: 'assets/images/closebridge.jpg',
+                onTap: () => Get.toNamed('/close_bridge'),
+              ),
+              const SizedBox(height: 16),
+              BridgeCard(
+                title: 'Rail Bridge',
+                description: 'Digunakan saat bola dekat dengan sisi meja.',
+                imagePath: 'assets/images/railbridge.jpg',
+                onTap: () => Get.toNamed('/rail_bridge'),
+              ),
+            ],
           ),
+        ),
+      ),
+    );
+  }
+}
 
-          // Isi konten utama
-          SafeArea(
-            child: Obx(() {
-              return Column(
-                children: [
-                  const SizedBox(height: 40),
-                  const Text(
-                    'Deteksi Teknik',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
+class BridgeCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final String imagePath;
+  final VoidCallback onTap;
 
-                  // Dropdown pilih model deteksi (telah diubah tampilannya)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: DropdownButtonFormField<String>(
-                      dropdownColor: Colors.black,
-                      decoration: const InputDecoration(
-                        filled: true,
-                        fillColor: Colors.black,
-                        labelText: 'Pilih Model Deteksi',
-                        labelStyle: TextStyle(color: Colors.white),
-                        border: OutlineInputBorder(),
-                      ),
-                      iconEnabledColor: Colors.white,
-                      value: controller.activeModelFile.value.isEmpty
-                          ? null
-                          : controller.activeModelFile.value,
-                      items: controller.modelMap.keys.map((fileName) {
-                        return DropdownMenuItem(
-                          value: fileName,
-                          child: Center(
-                            child: Text(
-                              controller.modelMap[fileName]!,
-                              style: const TextStyle(color: Colors.white),
-                              textAlign: TextAlign.center,
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                      onChanged: (value) {
-                        if (value != null) {
-                          controller.activeModelFile.value = value;
-                          controller.predictedLabel.value = 'unknown';
-                        }
-                      },
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  ),
+  const BridgeCard({
+    required this.title,
+    required this.description,
+    required this.imagePath,
+    required this.onTap,
+    super.key,
+  });
 
-                  const SizedBox(height: 24),
-
-                  if (!controller.isCameraInitialized.value)
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 24),
-                      child: ElevatedButton.icon(
-                        onPressed: controller.activeModelFile.value.isEmpty
-                            ? null
-                            : controller.startCamera,
-                        icon: const Icon(Icons.play_circle_fill),
-                        label: const Text('Mulai Deteksi'),
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size.fromHeight(50),
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(32),
-                          ),
-                          textStyle: const TextStyle(fontSize: 18),
-                        ),
-                      ),
-                    )
-                  else
-                    Expanded(
-                      child: Column(
-                        children: [
-                          Expanded(
-                            child: Stack(
-                              children: [
-                                if (controller.cameraController != null)
-                                  CameraPreview(controller.cameraController!),
-                                Positioned(
-                                  bottom: 24,
-                                  left: 16,
-                                  right: 16,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.6),
-                                      borderRadius: BorderRadius.circular(16),
-                                    ),
-                                    child: Text(
-                                      controller.predictedLabel.value != 'unknown'
-                                          ? 'Detected: ${controller.predictedLabel.value}'
-                                          : 'Detecting pose...',
-                                      style: const TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                      textAlign: TextAlign.center,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                              children: [
-                                ElevatedButton.icon(
-                                  onPressed: controller.stopCamera,
-                                  icon: const Icon(Icons.stop),
-                                  label: const Text('Stop'),
-                                  style: ElevatedButton.styleFrom(
-                                    backgroundColor: Colors.red,
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                  ),
-                                ),
-                                ElevatedButton.icon(
-                                  onPressed: controller.switchCamera,
-                                  icon: const Icon(Icons.flip_camera_android),
-                                  label: const Text('Switch'),
-                                  style: ElevatedButton.styleFrom(
-                                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Padding(
+          padding: const EdgeInsets.all(12),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.asset(
+                  imagePath,
+                  width: 80,
+                  height: 80,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                       ),
                     ),
-                ],
-              );
-            }),
+                    const SizedBox(height: 8),
+                    Text(
+                      description,
+                      style: const TextStyle(fontSize: 14, color: Colors.black54),
+                    ),
+                    const SizedBox(height: 8),
+                    TextButton(
+                      onPressed: onTap,
+                      child: const Text('Learn More'),
+                      style: TextButton.styleFrom(
+                        foregroundColor: Colors.deepOrange,
+                        padding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }

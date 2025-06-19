@@ -22,6 +22,9 @@ abstract class Routes {
   static const EDIT_PASSWORD = _Paths.EDIT_PASSWORD;
   static const STATISTIK = _Paths.STATISTIK;
   static const AKTIFITAS_LOGIN = _Paths.AKTIFITAS_LOGIN;
+  static const CLOSE_BRIDGE = _Paths.CLOSE_BRIDGE;
+  static const OPEN_BRIDGE = _Paths.OPEN_BRIDGE;
+  static const RAIL_BRIDGE = _Paths.RAIL_BRIDGE;
 }
 
 abstract class _Paths {
@@ -46,4 +49,7 @@ abstract class _Paths {
   static const EDIT_PASSWORD = '/edit-password';
   static const STATISTIK = '/statistik';
   static const AKTIFITAS_LOGIN = '/aktifitas-login';
+  static const CLOSE_BRIDGE = '/close-bridge';
+  static const OPEN_BRIDGE = '/open-bridge';
+  static const RAIL_BRIDGE = '/rail-bridge';
 }
