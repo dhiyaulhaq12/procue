@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import '../controllers/rail_bridge_controller.dart';
+import '../../../controllers/pose_detection_controller.dart';
 
 class RailBridgeBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<RailBridgeController>(() => RailBridgeController());
+    Get.lazyPut<PoseDetectionController>(() => PoseDetectionController('RailBridge'));
   }
 }

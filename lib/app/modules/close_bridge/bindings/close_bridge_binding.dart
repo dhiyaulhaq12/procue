@@ -1,9 +1,9 @@
 import 'package:get/get.dart';
-import '../controllers/close_bridge_controller.dart';
+import '../../../controllers/pose_detection_controller.dart';
 
 class CloseBridgeBinding extends Bindings {
   @override
   void dependencies() {
-    Get.lazyPut<CloseBridgeController>(() => CloseBridgeController());
+    Get.lazyPut<PoseDetectionController>(() => PoseDetectionController('CloseBridge'));
   }
 }

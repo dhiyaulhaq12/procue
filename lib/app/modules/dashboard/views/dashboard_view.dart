@@ -87,7 +87,7 @@ class DashboardView extends GetView {
                       mainAxisSpacing: 16,
                       childAspectRatio: 0.85,
                       children: [
-                        _buildMenuItem("assets/images/deteksi.jpeg", "Deteksi",
+                        _buildMenuItem("assets/images/deteksi.jpeg", "Latihan",
                             () {
                           Get.toNamed('/deteksi');
                         }),

@@ -156,19 +156,19 @@ class AppPages {
       binding: AktifitasLoginBinding(),
     ),
     GetPage(
-      name: '/close_bridge',
+      name: '/close-bridge',
       page: () => const CloseBridgeView(),
-      binding: DeteksiBinding(),
+      binding: CloseBridgeBinding(),
     ),
     GetPage(
-      name: '/open_bridge',
+      name: '/open-bridge',
       page: () => const OpenBridgeView(),
-      binding: DeteksiBinding(),
+      binding: OpenBridgeBinding(),
     ),
     GetPage(
-      name: '/rail_bridge',
+      name: '/rail-bridge',
       page: () => const RailBridgeView(),
-      binding: DeteksiBinding(),
+      binding: RailBridgeBinding(),
     ),
   ];
 }

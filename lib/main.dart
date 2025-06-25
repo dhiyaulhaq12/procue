@@ -16,7 +16,7 @@ void main() async {
 
   // Tambahkan controller login sebagai permanent
   Get.put(LoginController(), permanent: true);
-  Get.lazyPut(()=> OpenBridgeController());
+  // Get.lazyPut(()=> OpenBridgeController());
 
   runApp(
     GetMaterialApp(

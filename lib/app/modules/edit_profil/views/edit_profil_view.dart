@@ -13,7 +13,7 @@ class EditProfilView extends GetView<EditProfilController> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         title: const Text(
-          'Edit Profil',
+          'Edit Profile',
           style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
         ),
         elevation: 0,

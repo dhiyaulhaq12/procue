@@ -25,7 +25,7 @@ class StatistikView extends StatelessWidget {
             color: Colors.white,
           ),
         ),
-        titleSpacing: 0, // <--- ini bikin judul nempel ke kiri
+        titleSpacing: 0, 
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
       ),
