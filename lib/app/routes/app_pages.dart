@@ -122,7 +122,7 @@ class AppPages {
     ),
     GetPage(
       name: '/riwayat',
-      page: () => const RiwayatView(),
+      page: () => RiwayatView(),
       binding: RiwayatBinding(),
     ),
     GetPage(

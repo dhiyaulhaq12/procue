@@ -1,7 +1,11 @@
-import 'package:aplikasi_pelatihan_billiard_cerdas/app/controllers/pose_detection_controller.dart';
+import 'dart:convert';
+import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:aplikasi_pelatihan_billiard_cerdas/app/controllers/pose_detection_controller.dart';
 
 class CloseBridgeView extends StatelessWidget {
   const CloseBridgeView({super.key});
@@ -355,15 +359,99 @@ class CloseBridgeView extends StatelessWidget {
           final isCorrect = controller.predictedLabel.value == 'CloseBridge';
           return ElevatedButton.icon(
             onPressed: isCorrect
-                ? () {
-                    Get.snackbar(
-                      'Berhasil!',
-                      'Posisi Close Bridge sudah benar!',
-                      backgroundColor: Colors.green,
-                      colorText: Colors.white,
-                      duration: const Duration(seconds: 2),
-                      snackPosition: SnackPosition.TOP,
-                    );
+                ? () async {
+                    try {
+                      // ✅ Ambil gambar dari kamera
+                      final imageBytes = await controller.getCapturedImage();
+                      if (imageBytes == null) {
+                        Get.snackbar('Gagal', 'Gagal mengambil gambar');
+                        return;
+                      }
+
+                      // ✅ Upload ke Cloudinary
+                      final request = http.MultipartRequest(
+                        'POST',
+                        Uri.parse(
+                            'https://api.cloudinary.com/v1_1/dyukn4qlh/image/upload'),
+                      );
+                      request.fields['upload_preset'] = 'riwayat';
+                      request.files.add(
+                        http.MultipartFile.fromBytes(
+                          'file',
+                          imageBytes,
+                          filename:
+                              'pose_${DateTime.now().millisecondsSinceEpoch}.jpg',
+                        ),
+                      );
+                      debugPrint(
+                          '📤 Upload preset: ${request.fields['upload_preset']}');
+                      debugPrint('📤 Cloud URL: ${request.url}');
+                      debugPrint('📤 Image bytes length: ${imageBytes.length}');
+
+                      final response = await request.send();
+                      final responseData =
+                          await response.stream.bytesToString();
+                      final responseJson = jsonDecode(responseData);
+
+                      if (response.statusCode != 200) {
+                        Get.snackbar(
+                            'Error', 'Gagal upload gambar ke Cloudinary');
+                        return;
+                      }
+
+                      final imageUrl = responseJson['secure_url'];
+
+                      // ✅ Simpan riwayat ke backend
+                      final token = GetStorage().read('access_token');
+                      final historyData = {
+                        'label': controller.predictedLabel.value,
+                        'accuracy': controller.accuracy.value,
+                        'image_url': imageUrl,
+                        'timestamp': DateTime.now().toIso8601String(),
+                      };
+                      debugPrint('📤 Kirim ke backend: ${jsonEncode(historyData)}');
+
+
+                      final saveResponse = await http.post(
+                        Uri.parse('https://backend-billiard.vercel.app/riwayat'),
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': 'Bearer $token'
+                        },
+                        body: jsonEncode(historyData),
+                      );
+                      debugPrint('📥 Respon backend: ${saveResponse.statusCode} ${saveResponse.body}');
+
+
+                      if (saveResponse.statusCode == 200) {
+                        Get.snackbar(
+                          'Berhasil!',
+                          'Posisi Close Bridge sudah benar & riwayat disimpan!',
+                          backgroundColor: Colors.green,
+                          colorText: Colors.white,
+                          duration: const Duration(seconds: 2),
+                          snackPosition: SnackPosition.TOP,
+                        );
+                      } else {
+                        Get.snackbar(
+                          'Gagal',
+                          'Riwayat gagal disimpan!',
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                          duration: const Duration(seconds: 2),
+                          snackPosition: SnackPosition.TOP,
+                        );
+                      }
+                    } catch (e) {
+                      Get.snackbar(
+                        'Error',
+                        'Terjadi kesalahan: $e',
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                        duration: const Duration(seconds: 2),
+                        snackPosition: SnackPosition.TOP,
+                      );
+                    }
                   }
                 : null,
             icon: Icon(isCorrect ? Icons.check : Icons.hourglass_empty),

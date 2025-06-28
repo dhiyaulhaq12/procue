@@ -1,7 +1,10 @@
-import 'package:aplikasi_pelatihan_billiard_cerdas/app/controllers/pose_detection_controller.dart';
+import 'dart:convert';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:http/http.dart' as http;
+import 'package:aplikasi_pelatihan_billiard_cerdas/app/controllers/pose_detection_controller.dart';
 
 class OpenBridgeView extends StatelessWidget {
   const OpenBridgeView({super.key});
@@ -26,8 +29,8 @@ class OpenBridgeView extends StatelessWidget {
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color.fromARGB(255, 255, 255, 255), // Putih di atas
-              Color(0xFFB3E5FC), // Biru muda di bawah
+              Color.fromARGB(255, 255, 255, 255),
+              Color(0xFFB3E5FC),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -77,8 +80,7 @@ class OpenBridgeView extends StatelessWidget {
         child: Column(
           children: [
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
               child: Image.asset(
                 'assets/images/openbridge.jpg',
                 height: 200,
@@ -156,16 +158,14 @@ class OpenBridgeView extends StatelessWidget {
           icon: const SizedBox(
             width: 20,
             height: 20,
-            child:
-                CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
           ),
           label: const Text('Memuat Model...'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.grey,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
             elevation: 5,
           ),
         );
@@ -179,16 +179,14 @@ class OpenBridgeView extends StatelessWidget {
           backgroundColor: Colors.blue,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           elevation: 5,
         ),
       );
     });
   }
 
-  Widget _cameraPreview(
-      PoseDetectionController controller, double width, double height) {
+  Widget _cameraPreview(PoseDetectionController controller, double width, double height) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
@@ -199,9 +197,10 @@ class OpenBridgeView extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: Colors.blue.withOpacity(0.3),
-                blurRadius: 10,
-                offset: const Offset(0, 5))
+              color: Colors.blue.withOpacity(0.3),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
           ],
         ),
         child: ClipRRect(
@@ -238,9 +237,10 @@ class OpenBridgeView extends StatelessWidget {
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-                color: bgColor.withOpacity(0.3),
-                blurRadius: 8,
-                offset: const Offset(0, 4))
+              color: bgColor.withOpacity(0.3),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
           ],
         ),
         child: Row(
@@ -254,9 +254,10 @@ class OpenBridgeView extends StatelessWidget {
                     ? 'Mendeteksi posisi Open Bridge...'
                     : 'Terdeteksi: $label',
                 style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600),
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                ),
                 textAlign: TextAlign.left,
               ),
             ),
@@ -347,23 +348,88 @@ class OpenBridgeView extends StatelessWidget {
             backgroundColor: Colors.red,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
         ),
         Obx(() {
           final isCorrect = controller.predictedLabel.value == 'OpenBridge';
           return ElevatedButton.icon(
             onPressed: isCorrect
-                ? () {
-                    Get.snackbar(
-                      'Berhasil!',
-                      'Posisi Open Bridge sudah benar!',
-                      backgroundColor: Colors.green,
-                      colorText: Colors.white,
-                      duration: const Duration(seconds: 2),
-                      snackPosition: SnackPosition.TOP,
-                    );
+                ? () async {
+                    try {
+                      final imageBytes = await controller.getCapturedImage();
+                      if (imageBytes == null) {
+                        Get.snackbar('Gagal', 'Gagal mengambil gambar');
+                        return;
+                      }
+
+                      final request = http.MultipartRequest(
+                        'POST',
+                        Uri.parse('https://api.cloudinary.com/v1_1/dyukn4qlh/image/upload'),
+                      );
+                      request.fields['upload_preset'] = 'riwayat';
+                      request.files.add(http.MultipartFile.fromBytes(
+                        'file',
+                        imageBytes,
+                        filename: 'pose_${DateTime.now().millisecondsSinceEpoch}.jpg',
+                      ));
+
+                      final response = await request.send();
+                      final responseData = await response.stream.bytesToString();
+                      final responseJson = jsonDecode(responseData);
+
+                      if (response.statusCode != 200) {
+                        Get.snackbar('Error', 'Gagal upload gambar ke Cloudinary');
+                        return;
+                      }
+
+                      final imageUrl = responseJson['secure_url'];
+                      final token = GetStorage().read('access_token');
+                      final historyData = {
+                        'label': controller.predictedLabel.value,
+                        'accuracy': controller.accuracy.value,
+                        'image_url': imageUrl,
+                        'timestamp': DateTime.now().toIso8601String(),
+                      };
+
+                      final saveResponse = await http.post(
+                        Uri.parse('https://backend-billiard.vercel.app/riwayat'),
+                        headers: {
+                          'Content-Type': 'application/json',
+                          'Authorization': 'Bearer $token',
+                        },
+                        body: jsonEncode(historyData),
+                      );
+
+                      if (saveResponse.statusCode == 200) {
+                        Get.snackbar(
+                          'Berhasil!',
+                          'Posisi Open Bridge sudah benar & riwayat disimpan!',
+                          backgroundColor: Colors.green,
+                          colorText: Colors.white,
+                          duration: const Duration(seconds: 2),
+                          snackPosition: SnackPosition.TOP,
+                        );
+                      } else {
+                        Get.snackbar(
+                          'Gagal',
+                          'Riwayat gagal disimpan!',
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                          duration: const Duration(seconds: 2),
+                          snackPosition: SnackPosition.TOP,
+                        );
+                      }
+                    } catch (e) {
+                      Get.snackbar(
+                        'Error',
+                        'Terjadi kesalahan: $e',
+                        backgroundColor: Colors.red,
+                        colorText: Colors.white,
+                        duration: const Duration(seconds: 2),
+                        snackPosition: SnackPosition.TOP,
+                      );
+                    }
                   }
                 : null,
             icon: Icon(isCorrect ? Icons.check : Icons.hourglass_empty),
@@ -372,8 +438,7 @@ class OpenBridgeView extends StatelessWidget {
               backgroundColor: isCorrect ? Colors.green : Colors.grey,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
             ),
           );
         }),

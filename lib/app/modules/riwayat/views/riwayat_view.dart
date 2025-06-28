@@ -1,212 +1,203 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+import 'package:fl_chart/fl_chart.dart';
+import '../controllers/riwayat_controller.dart';
 
-class RiwayatView extends StatefulWidget {
-  const RiwayatView({Key? key}) : super(key: key);
-
-  @override
-  State<RiwayatView> createState() => _RiwayatViewState();
-}
-
-class _RiwayatViewState extends State<RiwayatView> {
-  final List<Map<String, String>> riwayatList = [
-    {
-      'judul': 'Open Bridge',
-      'imagePath': 'assets/images/openbridge.jpg',
-      'deskripsi': 'Posisi jari sebelum memukul bola sudah tepat dan mantap.',
-    },
-    {
-      'judul': 'Close Bridge',
-      'imagePath': 'assets/images/closebridge.jpg',
-      'deskripsi': 'Posisi jari saat bersiap membidik bola agar tetap stabil.',
-    },
-    {
-      'judul': 'Rail Bridge',
-      'imagePath': 'assets/images/railbridge.jpg',
-      'deskripsi':
-          'Posisi jari membentuk jembatan untuk menopang stik saat membidik.',
-    },
-  ];
-
-  final List<bool> showDetail = [];
-
-  @override
-  void initState() {
-    super.initState();
-    showDetail.addAll(List.generate(riwayatList.length, (index) => false));
-  }
-
-  void toggleDetail(int index) {
-    setState(() {
-      showDetail[index] = !showDetail[index];
-    });
-  }
-
-  void deleteItem(int index) {
-    setState(() {
-      riwayatList.removeAt(index);
-      showDetail.removeAt(index);
-    });
-  }
+class RiwayatView extends StatelessWidget {
+  final controller = Get.put(RiwayatController());
 
   @override
   Widget build(BuildContext context) {
+    controller.fetchRiwayat();
+
     return Scaffold(
-      backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
-                  child: Row(
-                    children: [
-                      GestureDetector(
-                        onTap: () => Get.back(),
-                        child:
-                            const Icon(Icons.arrow_back, color: Colors.white),
-                      ),
-                      const SizedBox(width: 10),
-                      const Text(
-                        'Riwayat Deteksi',
-                        style: TextStyle(
-                          fontSize: 22,
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                Image.asset(
-                  'assets/images/banner.jpg',
-                  height: 150,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                ),
-              ],
+      appBar: AppBar(
+        title: const Text('Riwayat Latihan'),
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.black,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.delete_forever),
+            onPressed: () {
+              Get.defaultDialog(
+                title: 'Hapus Semua',
+                middleText: 'Yakin ingin menghapus semua riwayat?',
+                textCancel: 'Batal',
+                textConfirm: 'Hapus',
+                confirmTextColor: Colors.white,
+                onConfirm: () {
+                  controller.deleteAllRiwayat();
+                  Get.back();
+                },
+              );
+            },
+          )
+        ],
+      ),
+      body: Obx(() {
+        final list = controller.riwayatList;
+        if (list.isEmpty) {
+          return const Center(child: Text('Belum ada riwayat'));
+        }
+
+        // Hitung jumlah label
+        final counts = {
+          'OpenBridge': 0,
+          'CloseBridge': 0,
+          'RailBridge': 0,
+        };
+        for (var item in list) {
+          final label = item['label'] ?? '';
+          if (counts.containsKey(label)) {
+            counts[label] = counts[label]! + 1;
+          }
+        }
+
+        final total = counts.values.fold(0, (a, b) => a + b);
+
+        return Column(
+          children: [
+            const SizedBox(height: 16),
+            const Text(
+              'Distribusi Latihan',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
             ),
-          ),
-          Positioned(
-            top: 220,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
+            SizedBox(
+              height: 220,
+              child: Center(
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: 1),
+                  duration: const Duration(seconds: 2),
+                  builder: (context, value, child) {
+                    return Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        SizedBox(
+                          width: 180,
+                          height: 180,
+                          child: CircularProgressIndicator(
+                            value: value,
+                            strokeWidth: 20,
+                            backgroundColor: Colors.grey.shade300,
+                            valueColor: const AlwaysStoppedAnimation(Colors.blue),
+                          ),
+                        ),
+                        if (value >= 1)
+                          SizedBox(
+                            width: 180,
+                            height: 180,
+                            child: PieChart(
+                              PieChartData(
+                                sectionsSpace: 0,
+                                centerSpaceRadius: 40,
+                                sections: [
+                                  PieChartSectionData(
+                                    color: Colors.blue,
+                                    value: counts['OpenBridge']!.toDouble(),
+                                    title: total > 0
+                                        ? '${(counts['OpenBridge']! / total * 100).toStringAsFixed(1)}%'
+                                        : '0%',
+                                    radius: 60,
+                                  ),
+                                  PieChartSectionData(
+                                    color: Colors.yellow,
+                                    value: counts['CloseBridge']!.toDouble(),
+                                    title: total > 0
+                                        ? '${(counts['CloseBridge']! / total * 100).toStringAsFixed(1)}%'
+                                        : '0%',
+                                    radius: 60,
+                                  ),
+                                  PieChartSectionData(
+                                    color: Colors.red,
+                                    value: counts['RailBridge']!.toDouble(),
+                                    title: total > 0
+                                        ? '${(counts['RailBridge']! / total * 100).toStringAsFixed(1)}%'
+                                        : '0%',
+                                    radius: 60,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          )
+                      ],
+                    );
+                  },
                 ),
               ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                _legend(Colors.blue, 'OpenBridge'),
+                const SizedBox(width: 8),
+                _legend(Colors.yellow, 'CloseBridge'),
+                const SizedBox(width: 8),
+                _legend(Colors.red, 'RailBridge'),
+              ],
+            ),
+            Expanded(
               child: ListView.builder(
-                itemCount: riwayatList.length,
+                itemCount: list.length,
                 itemBuilder: (context, index) {
-                  final item = riwayatList[index];
+                  final item = list[index];
+                  final accuracy = (item['accuracy'] is num)
+                      ? (item['accuracy'] as num).toStringAsFixed(1)
+                      : item['accuracy'].toString();
+
+                  String formattedDate = item['timestamp'] ?? '';
+                  try {
+                    final dateTime = DateTime.parse(item['timestamp']);
+                    formattedDate = DateFormat('dd-MM-yyyy HH:mm').format(dateTime);
+                  } catch (_) {}
+
                   return Card(
-                    shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20)),
-                    elevation: 4,
-                    margin: const EdgeInsets.symmetric(vertical: 10),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  item['judul']!,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                              ),
-                              IconButton(
-                                icon: Icon(
-                                  showDetail[index]
-                                      ? Icons.keyboard_arrow_up
-                                      : Icons.keyboard_arrow_down,
-                                  color: Colors.black,
-                                ),
-                                onPressed: () => toggleDetail(index),
-                              ),
-                            ],
-                          ),
-                          if (showDetail[index]) ...[
-                            const SizedBox(height: 12),
-                            ClipRRect(
-                              borderRadius: BorderRadius.circular(16),
-                              child: Image.asset(
-                                item['imagePath']!,
-                                height: 180,
-                                width: double.infinity,
-                                fit: BoxFit.cover,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(item['deskripsi']!),
-                            const SizedBox(height: 8),
-                            Align(
-                              alignment: Alignment.bottomRight,
-                              child: IconButton(
-                                icon:
-                                    const Icon(Icons.delete, color: Colors.red),
-                                onPressed: () => deleteItem(index),
-                              ),
-                            ),
-                          ],
-                        ],
+                    margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    child: ListTile(
+                      leading: Image.network(
+                        item['image_url'],
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
+                      ),
+                      title: Text(item['label'] ?? 'Tidak ada label'),
+                      subtitle: Text('Akurasi: $accuracy%\n$formattedDate'),
+                      isThreeLine: true,
+                      trailing: IconButton(
+                        icon: const Icon(Icons.delete, color: Colors.red),
+                        onPressed: () {
+                          Get.defaultDialog(
+                            title: 'Hapus Riwayat',
+                            middleText: 'Yakin ingin menghapus riwayat ini?',
+                            textCancel: 'Batal',
+                            textConfirm: 'Hapus',
+                            confirmTextColor: Colors.white,
+                            onConfirm: () {
+                              controller.deleteRiwayatById(item['id']);
+                              Get.back();
+                            },
+                          );
+                        },
                       ),
                     ),
                   );
                 },
               ),
             ),
-          ),
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 20,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(27),
-              child: Container(
-                height: 70,
-                color: Colors.black,
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildNavIcon(Icons.home, '/dashboard', Colors.white),
-                    _buildNavIcon(Icons.info_outline, '/about', Colors.white),
-                    _buildNavIcon(
-                        Icons.person_outline, '/profile', Colors.white),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
+          ],
+        );
+      }),
     );
   }
 
-  Widget _buildNavIcon(IconData icon, String route, Color color) {
-    return GestureDetector(
-      onTap: () {
-        if (route == '/dashboard') {
-          Get.offAllNamed(route);
-        } else {
-          Get.toNamed(route);
-        }
-      },
-      child: Icon(icon, color: color, size: 28),
+  Widget _legend(Color color, String text) {
+    return Row(
+      children: [
+        Container(width: 12, height: 12, color: color),
+        const SizedBox(width: 4),
+        Text(text, style: const TextStyle(fontSize: 12)),
+      ],
     );
   }
 }

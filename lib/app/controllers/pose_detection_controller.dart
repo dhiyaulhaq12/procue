@@ -3,9 +3,13 @@ import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import 'package:google_mlkit_pose_detection/google_mlkit_pose_detection.dart';
 import 'package:image/image.dart';
 import 'package:tflite_flutter/tflite_flutter.dart';
+import 'dart:typed_data';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class PoseDetectionController extends GetxController {
   final String targetLabel;
@@ -79,6 +83,76 @@ class PoseDetectionController extends GetxController {
       debugPrint('❌ Camera init error: $e');
     }
   }
+
+  Future<Uint8List?> getCapturedImage() async {
+  if (cameraController == null || !cameraController!.value.isInitialized) {
+    debugPrint("❌ Kamera belum siap");
+    return null;
+  }
+
+  try {
+    final XFile file = await cameraController!.takePicture();
+    return await file.readAsBytes();
+  } catch (e) {
+    debugPrint("❌ Gagal ambil gambar: $e");
+    return null;
+  }
+}
+
+Future<void> saveRiwayat(String label, double acc, Uint8List imageBytes) async {
+  try {
+    // Upload ke Cloudinary
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse('https://api.cloudinary.com/v1_1/YOUR_CLOUD_NAME/image/upload'),
+    );
+    request.fields['upload_preset'] = 'YOUR_UPLOAD_PRESET';
+    request.files.add(
+      http.MultipartFile.fromBytes(
+        'file',
+        imageBytes,
+        filename: 'pose_${DateTime.now().millisecondsSinceEpoch}.jpg',
+      ),
+    );
+
+    final response = await request.send();
+    final responseData = await response.stream.bytesToString();
+    final jsonRes = jsonDecode(responseData);
+
+    if (response.statusCode != 200) {
+      Get.snackbar("Error", "Gagal upload gambar ke Cloudinary");
+      return;
+    }
+
+    final imageUrl = jsonRes['secure_url'];
+
+    // Simpan ke backend
+    final token = GetStorage().read('access_token');
+    final body = jsonEncode({
+      "label": label,
+      "accuracy": acc,
+      "image_url": imageUrl,
+      "timestamp": DateTime.now().toIso8601String(),
+    });
+
+    final backendRes = await http.post(
+      Uri.parse('https://your-backend-url.com/api/riwayat'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: body,
+    );
+
+    if (backendRes.statusCode == 200) {
+      Get.snackbar("Berhasil", "Riwayat tersimpan!", backgroundColor: Colors.green, colorText: Colors.white);
+    } else {
+      Get.snackbar("Gagal", "Riwayat gagal disimpan!", backgroundColor: Colors.red, colorText: Colors.white);
+    }
+  } catch (e) {
+    Get.snackbar("Error", "Terjadi error: $e", backgroundColor: Colors.red, colorText: Colors.white);
+  }
+}
 
   Future<void> stopCamera() async {
     await cameraController?.stopImageStream();
