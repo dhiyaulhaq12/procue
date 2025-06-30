@@ -1,19 +1,45 @@
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
+import 'package:video_player/video_player.dart';
 import 'package:aplikasi_pelatihan_billiard_cerdas/app/controllers/pose_detection_controller.dart';
 
-class CloseBridgeView extends StatelessWidget {
+class CloseBridgeView extends StatefulWidget {
   const CloseBridgeView({super.key});
 
   @override
-  Widget build(BuildContext context) {
-    final controller = Get.put(PoseDetectionController('CloseBridge'));
+  State<CloseBridgeView> createState() => _CloseBridgeViewState();
+}
 
+class _CloseBridgeViewState extends State<CloseBridgeView> {
+  late PoseDetectionController controller;
+  late VideoPlayerController _videoController;
+
+  @override
+  void initState() {
+    super.initState();
+    controller = Get.put(PoseDetectionController('CloseBridge'));
+
+    _videoController =
+        VideoPlayerController.asset('assets/videos/closebridge.mp4')
+          ..initialize().then((_) {
+            setState(() {});
+            _videoController.setLooping(true);
+            _videoController.play();
+          });
+  }
+
+  @override
+  void dispose() {
+    _videoController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final cameraHeight = screenWidth * 4 / 3;
 
@@ -30,8 +56,8 @@ class CloseBridgeView extends StatelessWidget {
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             colors: [
-              Color.fromARGB(255, 255, 255, 255), // Putih di atas
-              Color(0xFFB3E5FC), // Biru muda di bawah
+              Color.fromARGB(255, 255, 255, 255),
+              Color(0xFFB3E5FC),
             ],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
@@ -83,12 +109,15 @@ class CloseBridgeView extends StatelessWidget {
             ClipRRect(
               borderRadius:
                   const BorderRadius.vertical(top: Radius.circular(16)),
-              child: Image.asset(
-                'assets/images/closebridge.jpg',
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              child: _videoController.value.isInitialized
+                  ? AspectRatio(
+                      aspectRatio: _videoController.value.aspectRatio,
+                      child: VideoPlayer(_videoController),
+                    )
+                  : const SizedBox(
+                      height: 200,
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
             ),
             const Padding(
               padding: EdgeInsets.all(16),
@@ -133,7 +162,7 @@ class CloseBridgeView extends StatelessWidget {
               Icon(Icons.info_outline, color: Colors.blue, size: 32),
               SizedBox(height: 8),
               Text(
-                'Instruksi Deteksi:',
+                'Instruksi Latihan:',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -178,7 +207,7 @@ class CloseBridgeView extends StatelessWidget {
       return ElevatedButton.icon(
         onPressed: controller.startCamera,
         icon: const Icon(Icons.play_circle_fill),
-        label: const Text('Mulai Deteksi'),
+        label: const Text('Mulai Latihan'),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blue,
           foregroundColor: Colors.white,
@@ -409,19 +438,20 @@ class CloseBridgeView extends StatelessWidget {
                         'image_url': imageUrl,
                         'timestamp': DateTime.now().toIso8601String(),
                       };
-                      debugPrint('📤 Kirim ke backend: ${jsonEncode(historyData)}');
-
+                      debugPrint(
+                          '📤 Kirim ke backend: ${jsonEncode(historyData)}');
 
                       final saveResponse = await http.post(
-                        Uri.parse('https://backend-billiard.vercel.app/riwayat'),
+                        Uri.parse(
+                            'https://backend-billiard.vercel.app/riwayat'),
                         headers: {
                           'Content-Type': 'application/json',
                           'Authorization': 'Bearer $token'
                         },
                         body: jsonEncode(historyData),
                       );
-                      debugPrint('📥 Respon backend: ${saveResponse.statusCode} ${saveResponse.body}');
-
+                      debugPrint(
+                          '📥 Respon backend: ${saveResponse.statusCode} ${saveResponse.body}');
 
                       if (saveResponse.statusCode == 200) {
                         Get.snackbar(

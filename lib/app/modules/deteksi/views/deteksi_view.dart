@@ -111,7 +111,7 @@ class BridgeCard extends StatelessWidget {
                   const SizedBox(height: 8),
                   TextButton(
                     onPressed: onTap,
-                    child: const Text('Learn More'),
+                    child: const Text('Pelajari Lebih Lanjut'),
                     style: TextButton.styleFrom(
                       foregroundColor: Colors.deepOrange,
                       padding: EdgeInsets.zero,

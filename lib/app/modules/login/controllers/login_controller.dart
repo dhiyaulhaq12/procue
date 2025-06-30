@@ -21,18 +21,19 @@ class LoginController extends GetxController {
       Get.snackbar('Gagal', 'Email dan password wajib diisi');
       return;
     }
-    final platform = await getPlatformInfo(); // ✅ ambil info device
-    final response = await AuthService.login(email, password, platform); // 🔄 kirim ke service
 
-    // Ambil nilai-nilai dari response
+    final platform = await getPlatformInfo();
+    final box = GetStorage();
+    box.write('deviceInfo', platform); // ✅ Simpan info device untuk logout
+
+    final response = await AuthService.login(email, password, platform);
+
     final accessToken = response['access_token'];
     final userId = response['user_id'];
     final username = response['username'];
 
-    // Debug print untuk melihat respons dari backend
     print("Login Response: $response");
 
-    // Cek apakah respons valid dan semua nilai bertipe String
     if (response['success'] == true &&
         accessToken is String &&
         userId is String &&
@@ -42,7 +43,6 @@ class LoginController extends GetxController {
       await prefs.setString('user_id', userId);
       await prefs.setString('username', username);
 
-      final box = GetStorage();
       box.write('access_token', accessToken);
       box.write('user_id', userId);
       box.write('username', username);
@@ -57,14 +57,12 @@ class LoginController extends GetxController {
     }
   }
 
-  // Login dengan Google
+  // ✅ Login dengan Google (disesuaikan)
   Future<void> signInWithGoogle() async {
     try {
-      final GoogleSignIn googleSignIn = GoogleSignIn(
-        scopes: ['email', 'profile'],
-      );
-
-      await googleSignIn.signOut(); // Optional: logout sebelumnya
+      final GoogleSignIn googleSignIn =
+          GoogleSignIn(scopes: ['email', 'profile']);
+      await googleSignIn.signOut(); // Optional: logout sesi sebelumnya
       final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
 
       if (googleUser == null) {
@@ -73,20 +71,47 @@ class LoginController extends GetxController {
         return;
       }
 
-      // Simpan data ke GetStorage dengan struktur yang sama seperti login API
+      final platform = await getPlatformInfo();
       final box = GetStorage();
-      box.write('userName', googleUser.displayName);
-      box.write('userEmail', googleUser.email);
-      box.write('profilePicture', googleUser.photoUrl); // ✅ simpan foto
-      box.write('userPassword', '*******'); // Kosong karena Google login
-      box.write('authType', 'google'); // Buat pembeda
+      box.write('deviceInfo', platform); // ✅ Simpan info device untuk logout
 
-      print("Login sukses: ${googleUser.displayName} (${googleUser.email})");
+      // 🔄 Kirim data login Google ke backend untuk simpan login_logs & dapatkan token
+      final response = await AuthService.loginGoogle(
+        googleUser.email,
+        googleUser.displayName ?? 'Pengguna Google',
+        platform,
+      );
 
-      Get.snackbar("Sukses", "Login Google berhasil");
+      print("Login Google Backend Response: $response");
 
-      // Navigasi ke halaman utama
-      Get.offAllNamed('/dashboard');
+      if (response['success'] == true) {
+        final prefs = await SharedPreferences.getInstance();
+        final accessToken = response['access_token'];
+        final userId = response['user_id'];
+        final username = response['username'];
+
+        await prefs.setString('access_token', accessToken);
+        await prefs.setString('user_id', userId);
+        await prefs.setString('username', username);
+
+        box.write('access_token', accessToken);
+        box.write('user_id', userId);
+        box.write('username', username);
+        box.write('authType', 'google');
+        box.write('userName', username);
+
+        // 🔥 Tambahan penting: simpan email & foto profil
+        box.write('userEmail', googleUser.email);
+        box.write('profilePicture', googleUser.photoUrl ?? '');
+
+        print("Login Google berhasil: ${googleUser.email}");
+
+        Get.snackbar("Sukses", "Login Google berhasil");
+        Get.offAllNamed('/dashboard');
+      } else {
+        Get.snackbar(
+            "Login Gagal", response['message'] ?? 'Gagal login Google');
+      }
     } catch (e) {
       print("Error saat login Google: $e");
       Get.snackbar("Error", "Terjadi kesalahan saat login: $e");

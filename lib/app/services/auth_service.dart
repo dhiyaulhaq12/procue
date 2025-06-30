@@ -82,6 +82,44 @@ class AuthService {
     }
   }
 
+  static Future<Map<String, dynamic>> loginGoogle(
+    String email, String name, String platform) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/login/google'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'name': name,
+        'platform': platform,
+      }),
+    );
+
+    final data = jsonDecode(response.body);
+
+    if (response.statusCode == 200) {
+      return {
+        'success': true,
+        'message': data['message'] ?? 'Login berhasil',
+        'access_token': data['access_token'],
+        'user_id': data['user_id'],
+        'username': data['username'],
+      };
+    } else {
+      return {
+        'success': false,
+        'message': data['message'] ?? 'Gagal login',
+      };
+    }
+  } catch (e) {
+    return {
+      'success': false,
+      'message': 'Terjadi kesalahan: $e',
+    };
+  }
+}
+
+
   static Future<Map<String, dynamic>> verifyOtp(
       String email, String otp) async {
     try {

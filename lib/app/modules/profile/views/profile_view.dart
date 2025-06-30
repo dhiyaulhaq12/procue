@@ -12,8 +12,13 @@ class ProfileView extends GetView<ProfileController> {
         backgroundColor: Colors.black,
         foregroundColor: Colors.white,
         titleSpacing: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () =>
+              Get.offAllNamed('/dashboard'), // ⬅️ langsung ke dashboard
+        ),
         title: const Padding(
-          padding: EdgeInsets.only(left: 16), // jarak kiri 16 untuk konsisten
+          padding: EdgeInsets.only(left: 4), // sedikit kiri agar sejajar
           child: Text(
             'Profile',
             style: TextStyle(
@@ -57,27 +62,33 @@ class ProfileView extends GetView<ProfileController> {
                         ),
                       )),
                   const SizedBox(height: 12),
-                  ElevatedButton.icon(
-                    onPressed: () async {
-                      await Get.toNamed('/edit-profile');
-                      controller
-                          .fetchUserData(); // muat ulang data setelah kembali
-                      controller
-                          .loadSavedProfilePicture(); // muat ulang foto profil
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.grey[100],
-                      foregroundColor: Colors.black,
-                      elevation: 1,
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                  Obx(() {
+                    final isGoogle = controller.authType.value == 'google';
+
+                    if (isGoogle)
+                      return SizedBox
+                          .shrink(); // Jangan tampilkan tombol sama sekali
+
+                    return ElevatedButton.icon(
+                      onPressed: () async {
+                        await Get.toNamed('/edit-profile');
+                        controller.fetchUserData();
+                        controller.loadSavedProfilePicture();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.grey[100],
+                        foregroundColor: Colors.black,
+                        elevation: 1,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                        ),
                       ),
-                    ),
-                    icon: const Icon(Icons.edit, size: 18),
-                    label: const Text("Edit Profil"),
-                  ),
+                      icon: const Icon(Icons.edit, size: 18),
+                      label: const Text("Edit Profil"),
+                    );
+                  }),
                   ElevatedButton.icon(
                     onPressed: () {
                       Get.toNamed('/aktifitas-login');
@@ -185,7 +196,7 @@ class ProfileView extends GetView<ProfileController> {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(27),
               child: Container(
-                height: 70,
+                height: 50,
                 color: Colors.black,
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Row(

@@ -1,136 +1,128 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/kamus_biliard_controller.dart';
 
-class KamusBiliardView extends GetView<KamusBiliardController> {
-  const KamusBiliardView({Key? key}) : super(key: key);
+class KamusBilliardView extends StatelessWidget {
+  const KamusBilliardView({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: const Text('Kamus Billiard'),
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
+        backgroundColor: Colors.white,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Get.back(),
+        foregroundColor: Colors.black,
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.white, Color(0xFFB3E5FC)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: ListView(
+            children: const [
+              KamusCard(
+                title: 'Teknik Pukulan',
+                description: 'Berbagai teknik dasar dan lanjutan dalam bermain billiard.',
+                imagePath: 'assets/images/teknik.jpg',
+                routeName: '/teknik_pukulan',
+              ),
+              SizedBox(height: 16),
+              KamusCard(
+                title: 'Peralatan',
+                description: 'Macam-macam peralatan yang digunakan dalam permainan billiard.',
+                imagePath: 'assets/images/peralatan.jpg',
+                routeName: '/peralatan',
+              ),
+              SizedBox(height: 16),
+              KamusCard(
+                title: 'Aturan Permainan',
+                description: 'Panduan aturan resmi dalam permainan billiard.',
+                imagePath: 'assets/images/aturan.png',
+                routeName: '/aturan_permainan',
+              ),
+              SizedBox(height: 16),
+              KamusCard(
+                title: 'Jenis Permainan',
+                description: 'Variasi permainan billiard seperti 8-ball, 9-ball, dll.',
+                imagePath: 'assets/images/jenis.jpg',
+                routeName: '/jenis_permainan',
+              ),
+            ],
+          ),
         ),
       ),
-      body: Stack(
-        children: [
-          // Banner di atas
-          Positioned(
-            top: 0,
-            left: 0,
-            right: 0,
-            child: Image.asset(
-              'assets/images/banner.jpg',
-              height: 150,
+    );
+  }
+}
+
+class KamusCard extends StatelessWidget {
+  final String title;
+  final String description;
+  final String imagePath;
+  final String routeName;
+
+  const KamusCard({
+    Key? key,
+    required this.title,
+    required this.description,
+    required this.imagePath,
+    required this.routeName,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => Get.toNamed(routeName),
+      child: Card(
+        elevation: 4,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        clipBehavior: Clip.antiAlias,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Image.asset(
+              imagePath,
               width: double.infinity,
+              height: 280,
               fit: BoxFit.cover,
             ),
-          ),
-
-          // Container putih dengan lengkungan di atas
-          Positioned(
-            top: 140, // sedikit di bawah banner
-            left: 0,
-            right: 0,
-            bottom: 0,
-            child: Container(
-              padding: const EdgeInsets.all(20),
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(30),
-                  topRight: Radius.circular(30),
-                ),
-              ),
+            Padding(
+              padding: const EdgeInsets.all(12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // const Text(
-                  //   "KATEGORI KAMUS",
-                  //   style: TextStyle(
-                  //     fontWeight: FontWeight.bold,
-                  //     fontSize: 16,
-                  //   ),
-                  // ),
-                  const SizedBox(height: 16),
-                  buildMenuButton('Teknik Pukulan', '/teknik_pukulan'),
-                  buildMenuButton('Peralatan', '/peralatan'),
-                  buildMenuButton('Aturan Permainan', '/aturan_permainan'),
-                  buildMenuButton('Jenis Permainan', '/jenis_permainan'),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    description,
+                    style: const TextStyle(fontSize: 14, color: Colors.black54),
+                  ),
+                  const SizedBox(height: 8),
+                  TextButton(
+                    onPressed: () => Get.toNamed(routeName),
+                    child: const Text('Lihat Detail'),
+                    style: TextButton.styleFrom(
+                      foregroundColor: Colors.deepOrange,
+                      padding: EdgeInsets.zero,
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-
-          // Floating Bottom Navigation
-          Positioned(
-            left: 20,
-            right: 20,
-            bottom: 20,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(27),
-              child: Container(
-                height: 70,
-                color: Colors.black,
-                padding: const EdgeInsets.symmetric(horizontal: 30),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildNavIcon(Icons.home, '/dashboard', Colors.white),
-                    _buildNavIcon(Icons.info_outline, '/about', Colors.white),
-                    _buildNavIcon(Icons.person_outline, '/profile', Colors.white),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  // Tombol Menu Kamus
-  Widget buildMenuButton(String title, String route) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: ElevatedButton(
-        onPressed: () => Get.toNamed(route),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black,
-          foregroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(25),
-          ),
-          minimumSize: const Size.fromHeight(50),
+          ],
         ),
-        child: Text(
-          title,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildNavIcon(IconData icon, String route, Color iconColor) {
-    return GestureDetector(
-      onTap: () {
-        if (route == '/dashboard') {
-          Get.offAllNamed(route);
-        } else {
-          Get.toNamed(route);
-        }
-      },
-      child: Icon(
-        icon,
-        color: iconColor,
-        size: 28,
       ),
     );
   }

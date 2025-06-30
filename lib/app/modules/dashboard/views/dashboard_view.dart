@@ -119,7 +119,7 @@ class DashboardView extends GetView {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(27),
               child: Container(
-                height: 70,
+                height: 50,
                 color: Colors.black,
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Row(

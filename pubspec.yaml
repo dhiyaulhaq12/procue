@@ -97,6 +97,13 @@ flutter:
     - assets/labels/label.txt
     - assets/models/pose_cnn_model.tflite
     - assets/models/pose_model.tflite
+    - assets/images/teknik.jpg
+    - assets/images/peralatan.jpg
+    - assets/images/aturan.png
+    - assets/images/jenis.jpg
+    - assets/videos/railbridge.mp4
+    - assets/videos/openbridge.mp4
+    - assets/videos/closebridge.mp4
 
 
     

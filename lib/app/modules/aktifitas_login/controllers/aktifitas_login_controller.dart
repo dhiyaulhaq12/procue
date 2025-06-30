@@ -19,47 +19,55 @@ class LoginActivityController extends GetxController {
   void fetchLoginLogs() async {
     try {
       isLoading.value = true;
-      
+
       // Inisialisasi ulang GetStorage untuk memastikan data terbaca
       await GetStorage.init();
       final box = GetStorage();
       final prefs = await SharedPreferences.getInstance();
-      
+
       // Cek jenis auth terlebih dahulu
       final authType = box.read('authType');
       print('=== DEBUG ACTIVITY CONTROLLER ===');
       print('Auth Type: $authType');
-      
+
       String? token;
-      
+
       // Ambil token sesuai dengan jenis auth
       if (authType == 'google') {
         // Untuk Google login, coba ambil token dari GetStorage atau SharedPreferences
         token = box.read('access_token') ?? prefs.getString('access_token');
-        
+
         // Jika tidak ada token untuk Google login, buat activity log lokal
         if (token == null || token.isEmpty) {
-          print('Google login tanpa backend token - buat activity log lokal');
-          
-          // Buat activity log lokal untuk Google login
-          final googleLoginTime = box.read('google_login_time') ?? DateTime.now().toIso8601String();
-          final userEmail = box.read('userEmail') ?? 'Unknown';
-          
-          activityLogs.value = [
-            {
+          print('Google login tanpa backend token - cek log lokal Google...');
+
+          final localLog = box.read('last_google_activity_log');
+          if (localLog != null && localLog is Map<String, dynamic>) {
+            activityLogs.value = [localLog];
+            print('Log aktivitas Google ditemukan secara lokal: $localLog');
+          } else {
+            // Fallback jika belum ada log tersimpan
+            final googleLoginTime = box.read('google_login_time') ??
+                DateTime.now().toIso8601String();
+            final userEmail = box.read('userEmail') ?? 'Unknown';
+
+            final log = {
               'id': 'google_${DateTime.now().millisecondsSinceEpoch}',
               'platform': 'Google Login',
               'last_activity': googleLoginTime,
               'ip_address': 'Google Auth',
-              'logout_time': null, // Google login masih aktif
+              'logout_time': null,
               'status': 'active',
               'user_email': userEmail,
-            }
-          ];
-          
+            };
+
+            activityLogs.value = [log];
+            print('Fallback Google login log: $log');
+          }
+
           Get.snackbar(
-            'Info', 
-            'Menampilkan aktivitas Google login',
+            'Info',
+            'Menampilkan aktivitas Google login (lokal)',
             snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.blue,
             colorText: Colors.white,
@@ -70,15 +78,15 @@ class LoginActivityController extends GetxController {
         // Login manual via token JWT
         token = box.read('access_token') ?? prefs.getString('access_token');
       }
-      
+
       print('Access Token: $token');
       print('Token null?: ${token == null}');
       print('Token empty?: ${token?.isEmpty}');
-      
+
       if (token == null || token.isEmpty) {
         print('Access token tidak ditemukan, menampilkan snackbar...');
         Get.snackbar(
-          'Error', 
+          'Error',
           'Token tidak ditemukan. Silakan login ulang.',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
@@ -102,23 +110,24 @@ class LoginActivityController extends GetxController {
 
       if (response.statusCode == 200) {
         final jsonData = json.decode(response.body);
-        
+
         if (jsonData['logs'] != null) {
           activityLogs.value = jsonData['logs'];
           print('Data logs berhasil dimuat: ${jsonData['logs'].length} items');
-          
+
           // Jika Google login dan ada data dari backend, tambahkan info Google
           if (authType == 'google') {
             // Tambahkan marker bahwa ini dari Google login
             for (var log in activityLogs) {
-              if (log['platform'] == null || log['platform'].toString().isEmpty) {
+              if (log['platform'] == null ||
+                  log['platform'].toString().isEmpty) {
                 log['platform'] = 'Google Login (Backend)';
               }
             }
           }
-          
+
           Get.snackbar(
-            'Success', 
+            'Success',
             'Data aktivitas berhasil dimuat',
             snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.green,
@@ -127,9 +136,10 @@ class LoginActivityController extends GetxController {
         } else {
           // Jika tidak ada data dari backend tapi Google login
           if (authType == 'google') {
-            final googleLoginTime = box.read('google_login_time') ?? DateTime.now().toIso8601String();
+            final googleLoginTime = box.read('google_login_time') ??
+                DateTime.now().toIso8601String();
             final userEmail = box.read('userEmail') ?? 'Unknown';
-            
+
             activityLogs.value = [
               {
                 'id': 'google_local_${DateTime.now().millisecondsSinceEpoch}',
@@ -144,21 +154,22 @@ class LoginActivityController extends GetxController {
           } else {
             activityLogs.value = [];
           }
-          
+
           Get.snackbar(
-            'Info', 
+            'Info',
             'Tidak ada data aktivitas dari server',
             snackPosition: SnackPosition.TOP,
           );
         }
       } else if (response.statusCode == 401) {
         print('Token expired atau tidak valid');
-        
+
         // Jika Google login dan token invalid, tetap tampilkan aktivitas lokal
         if (authType == 'google') {
-          final googleLoginTime = box.read('google_login_time') ?? DateTime.now().toIso8601String();
+          final googleLoginTime =
+              box.read('google_login_time') ?? DateTime.now().toIso8601String();
           final userEmail = box.read('userEmail') ?? 'Unknown';
-          
+
           activityLogs.value = [
             {
               'id': 'google_fallback_${DateTime.now().millisecondsSinceEpoch}',
@@ -170,9 +181,9 @@ class LoginActivityController extends GetxController {
               'user_email': userEmail,
             }
           ];
-          
+
           Get.snackbar(
-            'Info', 
+            'Info',
             'Menampilkan aktivitas Google login (mode fallback)',
             snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.orange,
@@ -180,7 +191,7 @@ class LoginActivityController extends GetxController {
           );
         } else {
           Get.snackbar(
-            'Error', 
+            'Error',
             'Token tidak valid. Silakan login ulang.',
             snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.red,
@@ -191,7 +202,7 @@ class LoginActivityController extends GetxController {
         final errorData = json.decode(response.body);
         print('Error 422: ${errorData}');
         Get.snackbar(
-          'Error', 
+          'Error',
           'Error 422: ${errorData['message'] ?? 'Data tidak valid'}',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
@@ -199,12 +210,13 @@ class LoginActivityController extends GetxController {
         );
       } else {
         print('Server error: ${response.statusCode}');
-        
+
         // Fallback untuk Google login jika server error
         if (authType == 'google') {
-          final googleLoginTime = box.read('google_login_time') ?? DateTime.now().toIso8601String();
+          final googleLoginTime =
+              box.read('google_login_time') ?? DateTime.now().toIso8601String();
           final userEmail = box.read('userEmail') ?? 'Unknown';
-          
+
           activityLogs.value = [
             {
               'id': 'google_error_${DateTime.now().millisecondsSinceEpoch}',
@@ -216,9 +228,9 @@ class LoginActivityController extends GetxController {
               'user_email': userEmail,
             }
           ];
-          
+
           Get.snackbar(
-            'Warning', 
+            'Warning',
             'Server tidak dapat diakses, menampilkan aktivitas lokal',
             snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.orange,
@@ -226,7 +238,7 @@ class LoginActivityController extends GetxController {
           );
         } else {
           Get.snackbar(
-            'Error', 
+            'Error',
             'Gagal mengakses server: ${response.statusCode}',
             snackPosition: SnackPosition.TOP,
             backgroundColor: Colors.red,
@@ -236,15 +248,16 @@ class LoginActivityController extends GetxController {
       }
     } catch (e) {
       print('Exception: $e');
-      
+
       // Fallback untuk Google login jika terjadi exception
       final box = GetStorage();
       final authType = box.read('authType');
-      
+
       if (authType == 'google') {
-        final googleLoginTime = box.read('google_login_time') ?? DateTime.now().toIso8601String();
+        final googleLoginTime =
+            box.read('google_login_time') ?? DateTime.now().toIso8601String();
         final userEmail = box.read('userEmail') ?? 'Unknown';
-        
+
         activityLogs.value = [
           {
             'id': 'google_exception_${DateTime.now().millisecondsSinceEpoch}',
@@ -256,9 +269,9 @@ class LoginActivityController extends GetxController {
             'user_email': userEmail,
           }
         ];
-        
+
         Get.snackbar(
-          'Warning', 
+          'Warning',
           'Terjadi kesalahan koneksi, menampilkan aktivitas lokal',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.orange,
@@ -266,7 +279,7 @@ class LoginActivityController extends GetxController {
         );
       } else {
         Get.snackbar(
-          'Error', 
+          'Error',
           'Terjadi kesalahan: $e',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
@@ -283,13 +296,13 @@ class LoginActivityController extends GetxController {
   Future<void> deleteActivityLog(String logId, int index) async {
     try {
       isDeleting.value = true;
-      
+
       // Cek jika ini adalah Google login log lokal
       if (logId.startsWith('google_')) {
         // Hapus dari list lokal saja (tidak ada di backend)
         activityLogs.removeAt(index);
         Get.snackbar(
-          'Success', 
+          'Success',
           'Log aktivitas Google berhasil dihapus (lokal)',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
@@ -297,14 +310,14 @@ class LoginActivityController extends GetxController {
         );
         return;
       }
-      
+
       final box = GetStorage();
       final prefs = await SharedPreferences.getInstance();
       final token = box.read('access_token') ?? prefs.getString('access_token');
-      
+
       if (token == null || token.isEmpty) {
         Get.snackbar(
-          'Error', 
+          'Error',
           'Token tidak ditemukan. Silakan login ulang.',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
@@ -329,7 +342,7 @@ class LoginActivityController extends GetxController {
         // Hapus dari list lokal
         activityLogs.removeAt(index);
         Get.snackbar(
-          'Success', 
+          'Success',
           'Log aktivitas berhasil dihapus',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
@@ -337,7 +350,7 @@ class LoginActivityController extends GetxController {
         );
       } else if (response.statusCode == 401) {
         Get.snackbar(
-          'Error', 
+          'Error',
           'Token tidak valid. Silakan login ulang.',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
@@ -345,7 +358,7 @@ class LoginActivityController extends GetxController {
         );
       } else if (response.statusCode == 404) {
         Get.snackbar(
-          'Error', 
+          'Error',
           'Log aktivitas tidak ditemukan',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
@@ -354,7 +367,7 @@ class LoginActivityController extends GetxController {
       } else {
         final errorData = json.decode(response.body);
         Get.snackbar(
-          'Error', 
+          'Error',
           'Gagal menghapus log: ${errorData['message'] ?? 'Error ${response.statusCode}'}',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
@@ -364,7 +377,7 @@ class LoginActivityController extends GetxController {
     } catch (e) {
       print('Exception saat delete: $e');
       Get.snackbar(
-        'Error', 
+        'Error',
         'Terjadi kesalahan: $e',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
@@ -379,19 +392,19 @@ class LoginActivityController extends GetxController {
   Future<void> deleteAllActivityLogs() async {
     try {
       isDeleting.value = true;
-      
+
       final box = GetStorage();
       final authType = box.read('authType');
-      
+
       // Jika semua log adalah Google login lokal
-      bool hasOnlyGoogleLogs = activityLogs.every((log) => 
-        log['id'].toString().startsWith('google_'));
-      
+      bool hasOnlyGoogleLogs = activityLogs
+          .every((log) => log['id'].toString().startsWith('google_'));
+
       if (hasOnlyGoogleLogs) {
         // Clear list lokal saja
         activityLogs.clear();
         Get.snackbar(
-          'Success', 
+          'Success',
           'Semua log aktivitas Google berhasil dihapus (lokal)',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
@@ -399,13 +412,13 @@ class LoginActivityController extends GetxController {
         );
         return;
       }
-      
+
       final prefs = await SharedPreferences.getInstance();
       final token = box.read('access_token') ?? prefs.getString('access_token');
-      
+
       if (token == null || token.isEmpty) {
         Get.snackbar(
-          'Error', 
+          'Error',
           'Token tidak ditemukan. Silakan login ulang.',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
@@ -430,7 +443,7 @@ class LoginActivityController extends GetxController {
         // Clear list lokal
         activityLogs.clear();
         Get.snackbar(
-          'Success', 
+          'Success',
           'Semua log aktivitas berhasil dihapus',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.green,
@@ -438,7 +451,7 @@ class LoginActivityController extends GetxController {
         );
       } else if (response.statusCode == 401) {
         Get.snackbar(
-          'Error', 
+          'Error',
           'Token tidak valid. Silakan login ulang.',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
@@ -447,7 +460,7 @@ class LoginActivityController extends GetxController {
       } else {
         final errorData = json.decode(response.body);
         Get.snackbar(
-          'Error', 
+          'Error',
           'Gagal menghapus semua log: ${errorData['message'] ?? 'Error ${response.statusCode}'}',
           snackPosition: SnackPosition.TOP,
           backgroundColor: Colors.red,
@@ -457,7 +470,7 @@ class LoginActivityController extends GetxController {
     } catch (e) {
       print('Exception saat delete all: $e');
       Get.snackbar(
-        'Error', 
+        'Error',
         'Terjadi kesalahan: $e',
         snackPosition: SnackPosition.TOP,
         backgroundColor: Colors.red,
@@ -473,7 +486,8 @@ class LoginActivityController extends GetxController {
     Get.dialog(
       AlertDialog(
         title: Text('Konfirmasi Hapus'),
-        content: Text('Apakah Anda yakin ingin menghapus log aktivitas dari $platform?'),
+        content: Text(
+            'Apakah Anda yakin ingin menghapus log aktivitas dari $platform?'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -496,7 +510,8 @@ class LoginActivityController extends GetxController {
     Get.dialog(
       AlertDialog(
         title: Text('Konfirmasi Hapus Semua'),
-        content: Text('Apakah Anda yakin ingin menghapus SEMUA log aktivitas?\n\nTindakan ini tidak dapat dibatalkan.'),
+        content: Text(
+            'Apakah Anda yakin ingin menghapus SEMUA log aktivitas?\n\nTindakan ini tidak dapat dibatalkan.'),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -507,7 +522,9 @@ class LoginActivityController extends GetxController {
               Get.back();
               deleteAllActivityLogs();
             },
-            child: Text('Hapus Semua', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+            child: Text('Hapus Semua',
+                style:
+                    TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

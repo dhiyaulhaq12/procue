@@ -5,9 +5,35 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import 'package:http/http.dart' as http;
 import 'package:aplikasi_pelatihan_billiard_cerdas/app/controllers/pose_detection_controller.dart';
+import 'package:video_player/video_player.dart';
 
-class RailBridgeView extends StatelessWidget {
+class RailBridgeView extends StatefulWidget {
   const RailBridgeView({super.key});
+
+  @override
+  State<RailBridgeView> createState() => _RailBridgeViewState();
+}
+
+class _RailBridgeViewState extends State<RailBridgeView> {
+  late VideoPlayerController _videoController;
+
+  @override
+  void initState() {
+    super.initState();
+    _videoController =
+        VideoPlayerController.asset('assets/videos/railbridge.mp4')
+          ..initialize().then((_) {
+            setState(() {}); // agar rebuild ketika siap
+            _videoController.setLooping(true);
+            _videoController.play();
+          });
+  }
+
+  @override
+  void dispose() {
+    _videoController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,13 +106,17 @@ class RailBridgeView extends StatelessWidget {
         child: Column(
           children: [
             ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-              child: Image.asset(
-                'assets/images/railbridge.jpg',
-                height: 200,
-                width: double.infinity,
-                fit: BoxFit.cover,
-              ),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(16)),
+              child: _videoController.value.isInitialized
+                  ? AspectRatio(
+                      aspectRatio: _videoController.value.aspectRatio,
+                      child: VideoPlayer(_videoController),
+                    )
+                  : const SizedBox(
+                      height: 200,
+                      child: Center(child: CircularProgressIndicator()),
+                    ),
             ),
             const Padding(
               padding: EdgeInsets.all(16),
@@ -131,7 +161,7 @@ class RailBridgeView extends StatelessWidget {
               Icon(Icons.info_outline, color: Colors.blue, size: 32),
               SizedBox(height: 8),
               Text(
-                'Instruksi Deteksi:',
+                'Instruksi Latihan:',
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 8),
@@ -158,14 +188,16 @@ class RailBridgeView extends StatelessWidget {
           icon: const SizedBox(
             width: 20,
             height: 20,
-            child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+            child:
+                CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
           ),
           label: const Text('Memuat Model...'),
           style: ElevatedButton.styleFrom(
             backgroundColor: Colors.grey,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
             elevation: 5,
           ),
         );
@@ -174,19 +206,21 @@ class RailBridgeView extends StatelessWidget {
       return ElevatedButton.icon(
         onPressed: controller.startCamera,
         icon: const Icon(Icons.play_circle_fill),
-        label: const Text('Mulai Deteksi'),
+        label: const Text('Mulai Latihan'),
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.blue,
           foregroundColor: Colors.white,
           padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           elevation: 5,
         ),
       );
     });
   }
 
-  Widget _cameraPreview(PoseDetectionController controller, double width, double height) {
+  Widget _cameraPreview(
+      PoseDetectionController controller, double width, double height) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Container(
@@ -348,7 +382,8 @@ class RailBridgeView extends StatelessWidget {
             backgroundColor: Colors.red,
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           ),
         ),
         Obx(() {
@@ -365,21 +400,25 @@ class RailBridgeView extends StatelessWidget {
 
                       final request = http.MultipartRequest(
                         'POST',
-                        Uri.parse('https://api.cloudinary.com/v1_1/dyukn4qlh/image/upload'),
+                        Uri.parse(
+                            'https://api.cloudinary.com/v1_1/dyukn4qlh/image/upload'),
                       );
                       request.fields['upload_preset'] = 'riwayat';
                       request.files.add(http.MultipartFile.fromBytes(
                         'file',
                         imageBytes,
-                        filename: 'pose_${DateTime.now().millisecondsSinceEpoch}.jpg',
+                        filename:
+                            'pose_${DateTime.now().millisecondsSinceEpoch}.jpg',
                       ));
 
                       final response = await request.send();
-                      final responseData = await response.stream.bytesToString();
+                      final responseData =
+                          await response.stream.bytesToString();
                       final responseJson = jsonDecode(responseData);
 
                       if (response.statusCode != 200) {
-                        Get.snackbar('Error', 'Gagal upload gambar ke Cloudinary');
+                        Get.snackbar(
+                            'Error', 'Gagal upload gambar ke Cloudinary');
                         return;
                       }
 
@@ -393,7 +432,8 @@ class RailBridgeView extends StatelessWidget {
                       };
 
                       final saveResponse = await http.post(
-                        Uri.parse('https://backend-billiard.vercel.app/riwayat'),
+                        Uri.parse(
+                            'https://backend-billiard.vercel.app/riwayat'),
                         headers: {
                           'Content-Type': 'application/json',
                           'Authorization': 'Bearer $token',
@@ -438,7 +478,8 @@ class RailBridgeView extends StatelessWidget {
               backgroundColor: isCorrect ? Colors.green : Colors.grey,
               foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20)),
             ),
           );
         }),

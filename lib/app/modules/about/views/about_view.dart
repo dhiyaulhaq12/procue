@@ -18,8 +18,7 @@ class AboutView extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: Colors.black,
                     image: DecorationImage(
-                      image: AssetImage(
-                          'assets/images/bg_about.png'), // Ganti dengan gambar sesuai
+                      image: AssetImage('assets/images/bg_about.png'),
                       fit: BoxFit.cover,
                       colorFilter: ColorFilter.mode(
                         Colors.black.withOpacity(0.5),
@@ -30,22 +29,30 @@ class AboutView extends StatelessWidget {
                   child: Padding(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 20, vertical: 24),
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text(
-                            "About",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 28,
-                              fontWeight: FontWeight.bold,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Tombol back dan judul
+                        Row(
+                          children: [
+                            GestureDetector(
+                              onTap: () => Get.offAllNamed('/dashboard'),
+                              child: const Icon(Icons.arrow_back,
+                                  color: Colors.white, size: 20),
                             ),
-                          ),
-                          SizedBox(height: 8),
-                        ],
-                      ),
+                            const SizedBox(width: 12),
+                            const Text(
+                              'Tentang Aplikasi',
+                              style: TextStyle(
+                                fontSize: 22,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                      ],
                     ),
                   ),
                 ),
@@ -55,7 +62,7 @@ class AboutView extends StatelessWidget {
 
           // Kontainer Putih
           Positioned(
-            top: 220, // Disesuaikan dengan posisi kontainer putih
+            top: 220,
             left: 0,
             right: 0,
             bottom: 0,
@@ -72,15 +79,15 @@ class AboutView extends StatelessWidget {
                 child: const Text(
                   "Procue adalah aplikasi pelatihan untuk membantu pemain biliar meningkatkan teknik dan strategi permainan melalui analisis gerakan yang cerdas dan interaktif.\n\n"
                   "Fitur utama dalam aplikasi ini meliputi:\n"
-                  "1. Deteksi\n"
+                  "1. Latihan\n"
                   "2. Kamus Billiard cerdas\n"
                   "3. Tutorial dan panduan\n"
-                  "4. Riwayat hasil Deteksi\n\n"
+                  "4. Riwayat hasil Latihan\n\n"
                   "Ada saran atau kendala?\nHubungi kami di:\nprocue.app@gmail.com",
                   style: TextStyle(
                     color: Colors.black,
-                    fontSize: 16,
-                    height: 1.5,
+                    fontSize: 18, // ✅ DIPERBESAR DARI 16
+                    height: 1.6,
                   ),
                 ),
               ),
@@ -95,7 +102,7 @@ class AboutView extends StatelessWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(27),
               child: Container(
-                height: 70,
+                height: 50,
                 color: Colors.black,
                 padding: const EdgeInsets.symmetric(horizontal: 30),
                 child: Row(
@@ -115,7 +122,6 @@ class AboutView extends StatelessWidget {
     );
   }
 
-  // ✅ Nav Bar Icon
   Widget _buildNavIcon(IconData icon, String route, Color iconColor) {
     return GestureDetector(
       onTap: () {

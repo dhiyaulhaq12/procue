@@ -92,17 +92,17 @@ class AppPages {
     ),
     GetPage(
       name: '/kamus-biliard',
-      page: () => const KamusBiliardView(),
+      page: () => const KamusBilliardView(),
       binding: KamusBiliardBinding(),
     ),
     GetPage(
       name: '/teknik_pukulan',
-      page: () => const TeknikPukulanView(),
+      page: () => TeknikPukulanView(),
       binding: TeknikPukulanBinding(),
     ),
     GetPage(
       name: '/peralatan',
-      page: () => const PeralatanView(),
+      page: () => PeralatanView(),
       binding: PeralatanBinding(),
     ),
     GetPage(

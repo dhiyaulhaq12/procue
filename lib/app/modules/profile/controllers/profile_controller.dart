@@ -11,10 +11,13 @@ class ProfileController extends GetxController {
   var username = ''.obs;
   var email = ''.obs;
   var profilePictureUrl = ''.obs;
+  var authType = ''.obs;
 
   final String baseUrl = 'https://backend-billiard.vercel.app';
 
   @override
+  final box = GetStorage(); // agar bisa dipakai langsung di view
+
   void onInit() {
     super.onInit();
     loadSavedProfilePicture();
@@ -31,7 +34,7 @@ class ProfileController extends GetxController {
   Future<String> getDeviceInfo() async {
     try {
       final DeviceInfoPlugin deviceInfo = DeviceInfoPlugin();
-      
+
       if (Platform.isAndroid) {
         final AndroidDeviceInfo androidInfo = await deviceInfo.androidInfo;
         return '${androidInfo.brand} ${androidInfo.model}';
@@ -68,7 +71,7 @@ class ProfileController extends GetxController {
 
   Future<void> fetchUserData() async {
     final box = GetStorage();
-    final authType = box.read('authType') ?? '';
+    authType.value = box.read('authType') ?? '';
 
     print('AuthType: $authType');
 
@@ -85,7 +88,7 @@ class ProfileController extends GetxController {
 
       final prefs = await SharedPreferences.getInstance();
       final token = prefs.getString('access_token');
-      
+
       // Ambil foto profil yang tersimpan terlebih dahulu
       final savedProfilePicture = prefs.getString('profile_picture') ?? '';
       if (savedProfilePicture.isNotEmpty) {
@@ -113,7 +116,8 @@ class ProfileController extends GetxController {
           email.value = user['email'] ?? '';
 
           // Update foto profil jika ada dari server
-          if (user['profile_picture'] != null && user['profile_picture'].toString().isNotEmpty) {
+          if (user['profile_picture'] != null &&
+              user['profile_picture'].toString().isNotEmpty) {
             profilePictureUrl.value = user['profile_picture'].toString();
             prefs.setString('profile_picture', user['profile_picture']);
           }
@@ -146,18 +150,17 @@ class ProfileController extends GetxController {
     try {
       final prefs = await SharedPreferences.getInstance();
       final box = GetStorage();
-      
-      // Ambil token sebelum dihapus
-      final token = prefs.getString('access_token');
-      
-      // Hanya panggil API logout jika menggunakan token (bukan Google login)
+
+      final token = prefs.getString('access_token') ?? box.read('access_token');
       final authType = box.read('authType') ?? '';
-      
-      if (token != null && authType != 'google') {
-        // Dapatkan informasi device secara dinamis
-        final deviceInfo = await getDeviceInfo();
-        
-        // Panggil API logout untuk mencatat logout di backend
+      String deviceInfo = box.read('deviceInfo') ?? 'unknown';
+
+      if (deviceInfo == 'unknown') {
+        deviceInfo = await getDeviceInfo();
+      }
+
+      // Tetap kirim request logout ke backend, baik login manual atau Google
+      if (token != null) {
         try {
           final response = await http.post(
             Uri.parse('$baseUrl/logout'),
@@ -165,15 +168,13 @@ class ProfileController extends GetxController {
               'Content-Type': 'application/json',
               'Authorization': 'Bearer $token',
             },
-            body: jsonEncode({
-              'platform': deviceInfo, // Menggunakan device info yang dinamis
-            }),
+            body: jsonEncode({'platform': deviceInfo}),
           );
-          
+
           print('Device Info: $deviceInfo');
           print('Logout API response: ${response.statusCode}');
           print('Logout API body: ${response.body}');
-          
+
           if (response.statusCode == 200) {
             print('Logout berhasil dicatat di backend');
           } else {
@@ -181,19 +182,15 @@ class ProfileController extends GetxController {
           }
         } catch (apiError) {
           print('Error calling logout API: $apiError');
-          // Tetap lanjutkan proses logout meskipun API gagal
         }
       }
-      
-      // Hapus semua data lokal (dilakukan terlepas dari response API)
+
+      // Hapus data lokal
       await prefs.remove('access_token');
       await prefs.remove('profile_picture');
-      await box.erase(); // Hapus semua data GetStorage
-      
-      // Navigasi ke halaman login dan hapus semua route sebelumnya
+      await box.erase();
+
       Get.offAllNamed('/login');
-      
-      // Tampilkan pesan sukses
       Get.snackbar(
         'Berhasil',
         'Logout berhasil',
@@ -202,33 +199,24 @@ class ProfileController extends GetxController {
         colorText: Colors.white,
         duration: Duration(seconds: 2),
       );
-      
     } catch (e) {
       print('Error during logout: $e');
-      
-      // Jika terjadi error, tetap hapus data lokal untuk keamanan
-      try {
-        final prefs = await SharedPreferences.getInstance();
-        final box = GetStorage();
-        await prefs.remove('access_token');
-        await prefs.remove('profile_picture');
-        await box.erase();
-        
-        Get.offAllNamed('/login');
-        
-        Get.snackbar(
-          'Peringatan',
-          'Logout berhasil (mode offline)',
-          snackPosition: SnackPosition.TOP,
-          backgroundColor: Colors.orange,
-          colorText: Colors.white,
-          duration: Duration(seconds: 2),
-        );
-      } catch (cleanupError) {
-        print('Error during cleanup: $cleanupError');
-        // Paksa navigasi ke login jika semua gagal
-        Get.offAllNamed('/login');
-      }
+      // Fallback logout offline
+      final prefs = await SharedPreferences.getInstance();
+      final box = GetStorage();
+      await prefs.remove('access_token');
+      await prefs.remove('profile_picture');
+      await box.erase();
+
+      Get.offAllNamed('/login');
+      Get.snackbar(
+        'Peringatan',
+        'Logout berhasil (offline)',
+        snackPosition: SnackPosition.TOP,
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+        duration: Duration(seconds: 2),
+      );
     }
   }
 }
